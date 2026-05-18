@@ -9,6 +9,10 @@
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -17,10 +21,55 @@
       background: linear-gradient(135deg, #fff7d6 0%, #e4f8ff 100%);
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     .page {
       width: min(1100px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 56px 0;
+      padding: 24px 0 56px;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(92, 113, 145, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-weight: 800;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .nav-links a {
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #46556d;
+      font-weight: 700;
+    }
+
+    .nav-links a:hover {
+      color: #0f766e;
+      background: #ccfbf1;
     }
 
     .hero {
@@ -44,6 +93,42 @@
       color: #5d6b82;
     }
 
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #ffffff;
+      background: #14b8a6;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(20, 184, 166, 0.24);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(20, 184, 166, 0.3);
+    }
+
+    .button.secondary {
+      color: #273043;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(39, 48, 67, 0.1);
+    }
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -56,11 +141,17 @@
       font-weight: 700;
     }
 
+    .section-title {
+      margin: 42px 0 16px;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      text-align: center;
+    }
+
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 22px;
-      margin-top: 34px;
+      margin-top: 18px;
     }
 
     .card {
@@ -90,22 +181,90 @@
       color: #46556d;
     }
 
+    .info-panel {
+      margin-top: 38px;
+      padding: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      box-shadow: 0 16px 35px rgba(39, 48, 67, 0.1);
+    }
+
+    .info-panel h2 {
+      margin: 0 0 12px;
+    }
+
+    .info-panel p {
+      margin: 0;
+      color: #5d6b82;
+      line-height: 1.8;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      max-width: calc(100% - 48px);
+      padding: 14px 18px;
+      color: #ffffff;
+      background: #273043;
+      border-radius: 16px;
+      box-shadow: 0 16px 35px rgba(39, 48, 67, 0.2);
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     footer {
       margin-top: 32px;
       text-align: center;
       color: #6b7280;
     }
+
+    @media (max-width: 640px) {
+      .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+        border-radius: 24px;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
   <main class="page">
-    <section class="hero">
+    <nav class="navbar" aria-label="页面导航">
+      <a class="logo" href="#">WebTest</a>
+      <div class="nav-links">
+        <a href="#home">首页</a>
+        <a href="#gallery">小猫小狗</a>
+        <a href="#about">说明</a>
+        <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </nav>
+
+    <section id="home" class="hero">
       <div class="badge">GitHub Pages is running</div>
       <h1>小猫小狗测试网页</h1>
       <p class="subtitle">如果你能看到这个页面和下面的图片，说明 GitHub Pages 已经正常工作。</p>
+      <div class="actions">
+        <a class="button" href="#gallery">查看小猫小狗</a>
+        <button class="button secondary" type="button" id="testButton">点我测试按钮</button>
+        <a class="button secondary" href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">打开 GitHub 仓库</a>
+      </div>
     </section>
 
-    <section class="gallery" aria-label="小猫小狗图片">
+    <h2 class="section-title">图片展示</h2>
+    <section id="gallery" class="gallery" aria-label="小猫小狗图片">
       <article class="card">
         <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=900&q=80" alt="一只可爱的小猫">
         <p>小猫上线，负责检查页面是否加载成功。</p>
@@ -127,9 +286,31 @@
       </article>
     </section>
 
+    <section id="about" class="info-panel">
+      <h2>这个页面可以测试什么？</h2>
+      <p>
+        这个静态页面包含页面内锚点跳转、外部链接跳转、按钮点击提示和远程图片加载。
+        如果这些内容都能正常使用，就说明 GitHub Pages 的基础访问、HTML、CSS 和 JavaScript 都已经生效。
+      </p>
+    </section>
+
     <footer>
       <p>Created for GitHub Pages test.</p>
     </footer>
   </main>
+  <div class="toast" id="toast" role="status" aria-live="polite">按钮测试成功，页面交互正常。</div>
+  <script>
+    const testButton = document.querySelector("#testButton");
+    const toast = document.querySelector("#toast");
+    let toastTimer;
+
+    testButton.addEventListener("click", () => {
+      clearTimeout(toastTimer);
+      toast.classList.add("show");
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    });
+  </script>
 </body>
 </html>

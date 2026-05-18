@@ -181,6 +181,74 @@
       color: #46556d;
     }
 
+    .meme-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+      gap: 24px;
+      align-items: center;
+      margin-top: 38px;
+      padding: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      box-shadow: 0 16px 35px rgba(39, 48, 67, 0.1);
+    }
+
+    .meme-copy h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.3rem);
+    }
+
+    .meme-copy p {
+      margin: 0 0 22px;
+      color: #5d6b82;
+      line-height: 1.8;
+    }
+
+    .meme-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 360px;
+      padding: 18px;
+      background: #fff7d6;
+      border: 2px dashed #fbbf24;
+      border-radius: 22px;
+      text-align: center;
+    }
+
+    .meme-stage img {
+      display: none;
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 16px;
+      object-fit: contain;
+      box-shadow: 0 16px 35px rgba(39, 48, 67, 0.16);
+    }
+
+    .meme-stage.has-image img {
+      display: block;
+    }
+
+    .meme-stage.has-image .meme-placeholder {
+      display: none;
+    }
+
+    .meme-placeholder {
+      color: #92400e;
+      font-weight: 800;
+    }
+
+    #memeStatus {
+      position: absolute;
+      right: 18px;
+      bottom: 14px;
+      left: 18px;
+      margin: 0;
+      color: #92400e;
+      font-size: 0.95rem;
+    }
+
     .info-panel {
       margin-top: 38px;
       padding: 28px;
@@ -237,6 +305,10 @@
       .nav-links {
         justify-content: flex-start;
       }
+
+      .meme-panel {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -247,6 +319,7 @@
       <div class="nav-links">
         <a href="#home">首页</a>
         <a href="#gallery">小猫小狗</a>
+        <a href="#meme">奶龙表情包</a>
         <a href="#about">说明</a>
         <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
@@ -258,6 +331,7 @@
       <p class="subtitle">如果你能看到这个页面和下面的图片，说明 GitHub Pages 已经正常工作。</p>
       <div class="actions">
         <a class="button" href="#gallery">查看小猫小狗</a>
+        <a class="button" href="#meme">获取奶龙表情包</a>
         <button class="button secondary" type="button" id="testButton">点我测试按钮</button>
         <a class="button secondary" href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">打开 GitHub 仓库</a>
       </div>
@@ -286,10 +360,24 @@
       </article>
     </section>
 
+    <section id="meme" class="meme-panel">
+      <div class="meme-copy">
+        <span class="badge">Nailong Meme Fetcher</span>
+        <h2>随机获取一张奶龙表情包</h2>
+        <p>点击按钮后，页面会从网络图片地址里随机加载一张奶龙表情包，用来测试静态网页里的按钮交互和远程图片加载。</p>
+        <button class="button" type="button" id="loadMemeButton">从网络获取一张</button>
+      </div>
+      <div class="meme-stage">
+        <div class="meme-placeholder" id="memePlaceholder">点击左侧按钮开始获取</div>
+        <img id="memeImage" alt="随机奶龙表情包" referrerpolicy="no-referrer">
+        <p id="memeStatus">等待获取奶龙表情包。</p>
+      </div>
+    </section>
+
     <section id="about" class="info-panel">
       <h2>这个页面可以测试什么？</h2>
       <p>
-        这个静态页面包含页面内锚点跳转、外部链接跳转、按钮点击提示和远程图片加载。
+        这个静态页面包含页面内锚点跳转、外部链接跳转、按钮点击提示、随机表情包获取和远程图片加载。
         如果这些内容都能正常使用，就说明 GitHub Pages 的基础访问、HTML、CSS 和 JavaScript 都已经生效。
       </p>
     </section>
@@ -300,9 +388,40 @@
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite">按钮测试成功，页面交互正常。</div>
   <script>
+    const nailongMemes = [
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0ff2d016kLr.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d10206e1cxgX.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d1010d36dsHW.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d100da4e7pZb.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d100b5643AUW.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d100940eeXHO.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d100794e0hsy.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d10033ee3NFD.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d1000e5feZNf.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0ffdbbe7Ao5.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0ff76727WPM.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0ff53677JP8.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0febe9c4bFC.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0fe413b1F3b.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0fd6263eaav.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0fe5b2b0Y39.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0fe0e54cDL2.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6841d0fdbd093hlz.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/683e68711c0f3rKQ.jpeg",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/69c974c625827xCt.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/67f4914497e73Dd7.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/65aa9a22a7650Ioo.gif",
+      "https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/63407a521d292Qy1.gif"
+    ];
+
     const testButton = document.querySelector("#testButton");
     const toast = document.querySelector("#toast");
+    const loadMemeButton = document.querySelector("#loadMemeButton");
+    const memeImage = document.querySelector("#memeImage");
+    const memeStage = document.querySelector(".meme-stage");
+    const memeStatus = document.querySelector("#memeStatus");
     let toastTimer;
+    let lastMemeUrl = "";
 
     testButton.addEventListener("click", () => {
       clearTimeout(toastTimer);
@@ -310,6 +429,48 @@
       toastTimer = setTimeout(() => {
         toast.classList.remove("show");
       }, 2200);
+    });
+
+    function getShuffledMemes() {
+      return [...nailongMemes].sort(() => Math.random() - 0.5);
+    }
+
+    function loadMemeFromNetwork(candidates) {
+      const [nextUrl, ...restUrls] = candidates;
+
+      if (!nextUrl) {
+        memeStatus.textContent = "获取失败，可能是网络或图片站点限制，请稍后再试。";
+        loadMemeButton.disabled = false;
+        loadMemeButton.textContent = "重新获取一张";
+        return;
+      }
+
+      const previewImage = new Image();
+      previewImage.referrerPolicy = "no-referrer";
+
+      previewImage.onload = () => {
+        memeImage.src = nextUrl;
+        memeStage.classList.add("has-image");
+        memeStatus.textContent = "已从网络获取一张奶龙表情包。";
+        loadMemeButton.disabled = false;
+        loadMemeButton.textContent = "再获取一张";
+        lastMemeUrl = nextUrl;
+      };
+
+      previewImage.onerror = () => {
+        loadMemeFromNetwork(restUrls);
+      };
+
+      previewImage.src = nextUrl;
+    }
+
+    loadMemeButton.addEventListener("click", () => {
+      loadMemeButton.disabled = true;
+      loadMemeButton.textContent = "正在获取...";
+      memeStatus.textContent = "正在从网络加载奶龙表情包...";
+
+      const candidates = getShuffledMemes().filter((url) => url !== lastMemeUrl);
+      loadMemeFromNetwork(candidates.length > 0 ? candidates : getShuffledMemes());
     });
   </script>
 </body>

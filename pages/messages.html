@@ -37,10 +37,14 @@
         </label>
         <label>
           留言
-          <textarea id="messageContent" rows="5" maxlength="200" placeholder="写点什么吧" required></textarea>
+          <textarea id="messageContent" rows="8" maxlength="3000" placeholder="写点什么吧，最多 3000 字" required></textarea>
+        </label>
+        <label class="honeypot" aria-hidden="true">
+          个人网站
+          <input id="messageWebsite" type="text" name="website" tabindex="-1" autocomplete="off">
         </label>
         <div class="actions compact">
-          <button class="button" type="submit">发布留言</button>
+          <button class="button" type="submit" id="submitMessageButton">发布留言</button>
           <button class="button secondary" type="button" id="clearMessagesButton">说明</button>
         </div>
       </form>

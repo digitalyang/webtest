@@ -1,14 +1,41 @@
 const messageForm = document.querySelector("#messageForm");
 const messageName = document.querySelector("#messageName");
 const messageContent = document.querySelector("#messageContent");
+const messageWebsite = document.querySelector("#messageWebsite");
 const messagesList = document.querySelector("#messagesList");
 const clearMessagesButton = document.querySelector("#clearMessagesButton");
+const submitMessageButton = document.querySelector("#submitMessageButton");
 const messagesApi = "/api/messages";
+let cooldownTimer;
 
 function escapeText(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function formatBeijingTime(value) {
+  if (!value) {
+    return "";
+  }
+
+  const normalized = value.includes("T") ? value : value.replace(" ", "T") + "Z";
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).format(date).replaceAll("/", "-");
 }
 
 function renderMessages(messages) {
@@ -21,7 +48,7 @@ function renderMessages(messages) {
     <article class="message-item">
       <div class="message-meta">
         <strong>${escapeText(message.name)}</strong>
-        <time>${escapeText(message.time)}</time>
+        <time>${escapeText(formatBeijingTime(message.time))}</time>
       </div>
       <p>${escapeText(message.content)}</p>
     </article>
@@ -45,6 +72,27 @@ async function loadMessages() {
   }
 }
 
+function startSubmitCooldown(seconds = 3) {
+  let remaining = seconds;
+  const originalText = "发布留言";
+
+  submitMessageButton.disabled = true;
+  submitMessageButton.textContent = `请等待 ${remaining} 秒`;
+  clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(() => {
+    remaining -= 1;
+
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      submitMessageButton.disabled = false;
+      submitMessageButton.textContent = originalText;
+      return;
+    }
+
+    submitMessageButton.textContent = `请等待 ${remaining} 秒`;
+  }, 1000);
+}
+
 if (messageForm && messagesList) {
   loadMessages();
 
@@ -65,7 +113,11 @@ if (messageForm && messagesList) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ name, content })
+        body: JSON.stringify({
+          name,
+          content,
+          website: messageWebsite.value.trim()
+        })
       });
       const data = await response.json();
 
@@ -78,6 +130,8 @@ if (messageForm && messagesList) {
       await loadMessages();
     } catch (error) {
       showToast(error.message);
+    } finally {
+      startSubmitCooldown();
     }
   });
 

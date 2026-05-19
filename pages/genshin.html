@@ -17,7 +17,7 @@
         <a href="diary.html">日记分享</a>
         <a href="messages.html">留言板</a>
         <a href="nailong.html">奶龙表情包</a>
-        <a class="active" href="genshin.html">原神下载</a>
+        <a class="active" href="https://ys.mihoyo.com/main/" data-genshin-download>原神下载</a>
         <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
     </nav>
@@ -27,13 +27,8 @@
       <h1>原神下载入口</h1>
       <p class="subtitle">点击按钮会直接使用官方下载地址，不再跳转到介绍网页。</p>
       <div class="actions">
-        <a class="button genshin" href="https://ys.mihoyo.com/main/" id="genshinDownloadButton">下载原神</a>
+        <a class="button genshin" href="https://ys.mihoyo.com/main/" data-genshin-download data-genshin-label="auto">下载原神</a>
       </div>
-    </section>
-
-    <section class="panel">
-      <h2>说明</h2>
-      <p>Windows 会使用 PC 安装包地址，Android 会使用安卓安装包地址，iOS 会使用官方 iOS 下载入口。</p>
     </section>
 
     <footer>
@@ -42,6 +37,5 @@
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/genshin.js"></script>
 </body>
 </html>

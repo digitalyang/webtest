@@ -115,6 +115,29 @@ function setupClickStars() {
   document.addEventListener("click", createClickStar);
 }
 
+function trackPageView() {
+  const payload = JSON.stringify({
+    path: window.location.pathname,
+    title: document.title,
+    referrer: document.referrer
+  });
+
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon("/api/stats", new Blob([payload], { type: "application/json" }));
+    return;
+  }
+
+  fetch("/api/stats", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: payload,
+    keepalive: true
+  }).catch(() => {});
+}
+
 setupGenshinDownloadLinks();
 setupTestButtons();
 setupClickStars();
+trackPageView();

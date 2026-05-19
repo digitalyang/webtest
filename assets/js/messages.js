@@ -3,23 +3,15 @@ const messageName = document.querySelector("#messageName");
 const messageContent = document.querySelector("#messageContent");
 const messagesList = document.querySelector("#messagesList");
 const clearMessagesButton = document.querySelector("#clearMessagesButton");
-const storageKey = "webtest_guestbook_messages";
+const messagesApi = "/api/messages";
 
-function getMessages() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKey)) || [];
-  } catch {
-    return [];
-  }
+function escapeText(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }
 
-function saveMessages(messages) {
-  localStorage.setItem(storageKey, JSON.stringify(messages));
-}
-
-function renderMessages() {
-  const messages = getMessages();
-
+function renderMessages(messages) {
   if (messages.length === 0) {
     messagesList.innerHTML = '<p class="empty-state">还没有留言，来写第一条吧。</p>';
     return;
@@ -28,49 +20,68 @@ function renderMessages() {
   messagesList.innerHTML = messages.map((message) => `
     <article class="message-item">
       <div class="message-meta">
-        <strong>${message.name}</strong>
-        <time>${message.time}</time>
+        <strong>${escapeText(message.name)}</strong>
+        <time>${escapeText(message.time)}</time>
       </div>
-      <p>${message.content}</p>
+      <p>${escapeText(message.content)}</p>
     </article>
   `).join("");
 }
 
-function escapeText(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
+async function loadMessages() {
+  messagesList.innerHTML = '<p class="empty-state">正在加载留言...</p>';
+
+  try {
+    const response = await fetch(messagesApi);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "留言加载失败。");
+    }
+
+    renderMessages(data.messages || []);
+  } catch (error) {
+    messagesList.innerHTML = `<p class="empty-state">${escapeText(error.message)}</p>`;
+  }
 }
 
 if (messageForm && messagesList) {
-  renderMessages();
+  loadMessages();
 
-  messageForm.addEventListener("submit", (event) => {
+  messageForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const name = escapeText(messageName.value.trim());
-    const content = escapeText(messageContent.value.trim());
+    const name = messageName.value.trim();
+    const content = messageContent.value.trim();
 
     if (!name || !content) {
       showToast("请先填写昵称和留言内容。");
       return;
     }
 
-    const messages = getMessages();
-    messages.unshift({
-      name,
-      content,
-      time: new Date().toLocaleString("zh-CN", { hour12: false })
-    });
-    saveMessages(messages.slice(0, 20));
-    messageForm.reset();
-    renderMessages();
-    showToast("留言已保存到当前浏览器。");
+    try {
+      const response = await fetch(messagesApi, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, content })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "留言发布失败。");
+      }
+
+      messageForm.reset();
+      showToast("留言发布成功。");
+      await loadMessages();
+    } catch (error) {
+      showToast(error.message);
+    }
   });
 
   clearMessagesButton.addEventListener("click", () => {
-    localStorage.removeItem(storageKey);
-    renderMessages();
-    showToast("本地留言已清空。");
+    showToast("公开留言不能在前端直接清空。");
   });
 }

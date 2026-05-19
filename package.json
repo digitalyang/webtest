@@ -1,0 +1,27 @@
+{
+  "name": "webtest",
+  "version": "1.0.0",
+  "description": "Personal static site with Cloudflare Pages Functions.",
+  "scripts": {
+    "dev": "wrangler pages dev . --compatibility-date=2026-05-19",
+    "pages:create": "wrangler pages project create webtest --production-branch=main",
+    "deploy": "wrangler pages deploy . --project-name=webtest",
+    "d1:migrate:local": "wrangler d1 migrations apply webtest-db --local",
+    "d1:migrate:remote": "wrangler d1 migrations apply webtest-db --remote"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitalyang/webtest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/digitalyang/webtest/issues"
+  },
+  "homepage": "https://github.com/digitalyang/webtest#readme",
+  "devDependencies": {
+    "wrangler": "^4.92.0"
+  }
+}

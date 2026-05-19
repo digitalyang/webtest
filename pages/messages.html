@@ -16,6 +16,7 @@
         <a href="portfolio.html">作品集</a>
         <a href="diary.html">日记分享</a>
         <a class="active" href="messages.html">留言板</a>
+        <a href="stats.html">访问统计</a>
         <a href="nailong.html">奶龙表情包</a>
         <a href="https://ys.mihoyo.com/main/" data-genshin-download>原神下载</a>
         <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -25,7 +26,7 @@
     <section class="hero">
       <div class="badge">Guestbook</div>
       <h1>留言板</h1>
-      <p class="subtitle">纯静态站没有后端，当前留言会保存在你的浏览器本地。</p>
+      <p class="subtitle">留言会通过 Cloudflare D1 保存，所有访问者都可以看到最新留言。</p>
     </section>
 
     <section class="message-board">
@@ -40,7 +41,7 @@
         </label>
         <div class="actions compact">
           <button class="button" type="submit">发布留言</button>
-          <button class="button secondary" type="button" id="clearMessagesButton">清空本地留言</button>
+          <button class="button secondary" type="button" id="clearMessagesButton">说明</button>
         </div>
       </form>
 

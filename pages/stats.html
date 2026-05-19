@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>日记分享 - 个人主页</title>
+  <title>访问统计 - 个人主页</title>
   <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
@@ -14,9 +14,9 @@
         <a href="../index.html">首页</a>
         <a href="about.html">个人简介</a>
         <a href="portfolio.html">作品集</a>
-        <a class="active" href="diary.html">日记分享</a>
+        <a href="diary.html">日记分享</a>
         <a href="messages.html">留言板</a>
-        <a href="stats.html">访问统计</a>
+        <a class="active" href="stats.html">访问统计</a>
         <a href="nailong.html">奶龙表情包</a>
         <a href="https://ys.mihoyo.com/main/" data-genshin-download>原神下载</a>
         <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -24,29 +24,29 @@
     </nav>
 
     <section class="hero">
-      <div class="badge">Diary</div>
-      <h1>日记分享</h1>
-      <p class="subtitle">记录一些学习、生活和搭建网站过程中的想法。</p>
+      <div class="badge">Analytics</div>
+      <h1>访问统计</h1>
+      <p class="subtitle">通过 Cloudflare D1 记录页面访问数据。</p>
     </section>
 
-    <section class="timeline">
-      <article class="timeline-item">
-        <time>2026-05-19</time>
-        <h2>把站点整理成个人主页</h2>
-        <p>今天把页面整理成更像个人博客的结构，新增了个人简介、作品集、日记和留言板。</p>
+    <section class="stat-grid">
+      <article class="stat-card">
+        <span>总访问量</span>
+        <strong id="totalViews">-</strong>
       </article>
-
-      <article class="timeline-item">
-        <time>2026-05-18</time>
-        <h2>第一次整理静态网页</h2>
-        <p>从一个简单的 HTML 页面开始，逐步拆出页面、样式、脚本和资源目录。</p>
+      <article class="stat-card">
+        <span>今日访问量</span>
+        <strong id="todayViews">-</strong>
       </article>
     </section>
+
+    <section class="panel-list" id="pageStats" aria-live="polite"></section>
 
     <footer>
       <p><a href="../index.html">返回首页</a></p>
     </footer>
   </main>
   <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/stats.js"></script>
 </body>
 </html>

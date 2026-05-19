@@ -1,0 +1,8 @@
+name = "webtest"
+compatibility_date = "2026-05-19"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "webtest-db"
+database_id = "38c0b8a4-9bdc-4503-80ea-1a6ba0e7a5dc"

@@ -1,5 +1,5 @@
 const genshinDownloadButton = document.querySelector("#genshinDownloadButton");
-let genshinDownloadTip = "正在打开原神官方下载页面。";
+let genshinDownloadTip = "正在准备原神官方下载。";
 
 const genshinDownloadLinks = {
   pc: {
@@ -21,10 +21,10 @@ const genshinDownloadLinks = {
     directDownload: false
   },
   official: {
-    label: "下载原神",
-    url: "https://ys.mihoyo.com/main/",
-    tip: "当前设备暂无匹配安装包，正在打开原神官方下载页面。",
-    directDownload: false
+    label: "下载原神（PC版）",
+    url: "https://ys-api.mihoyo.com/event/download_porter/link/ys_cn/official/pc_default",
+    tip: "未识别到移动设备，正在下载原神 PC 安装器。",
+    directDownload: true
   }
 };
 

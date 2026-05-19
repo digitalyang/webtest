@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>留言板 - 个人主页</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+  <main class="page">
+    <nav class="navbar" aria-label="页面导航">
+      <a class="logo" href="../index.html">个人主页</a>
+      <div class="nav-links">
+        <a href="../index.html">首页</a>
+        <a href="about.html">个人简介</a>
+        <a href="portfolio.html">作品集</a>
+        <a href="diary.html">日记分享</a>
+        <a class="active" href="messages.html">留言板</a>
+        <a href="nailong.html">奶龙表情包</a>
+        <a href="genshin.html">原神下载</a>
+        <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="badge">Guestbook</div>
+      <h1>留言板</h1>
+      <p class="subtitle">纯静态站没有后端，当前留言会保存在你的浏览器本地。</p>
+    </section>
+
+    <section class="message-board">
+      <form class="message-form" id="messageForm">
+        <label>
+          昵称
+          <input id="messageName" type="text" maxlength="20" placeholder="请输入昵称" required>
+        </label>
+        <label>
+          留言
+          <textarea id="messageContent" rows="5" maxlength="200" placeholder="写点什么吧" required></textarea>
+        </label>
+        <div class="actions compact">
+          <button class="button" type="submit">发布留言</button>
+          <button class="button secondary" type="button" id="clearMessagesButton">清空本地留言</button>
+        </div>
+      </form>
+
+      <div class="messages" id="messagesList" aria-live="polite"></div>
+    </section>
+
+    <footer>
+      <p><a href="../index.html">返回首页</a></p>
+    </footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/messages.js"></script>
+</body>
+</html>

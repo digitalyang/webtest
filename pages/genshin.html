@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>原神下载 - WebTest</title>
+  <title>原神下载 - 个人主页</title>
   <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
   <main class="page">
     <nav class="navbar" aria-label="页面导航">
-      <a class="logo" href="../index.html">WebTest</a>
+      <a class="logo" href="../index.html">个人主页</a>
       <div class="nav-links">
         <a href="../index.html">首页</a>
-        <a href="pets.html">小猫小狗</a>
+        <a href="about.html">个人简介</a>
+        <a href="portfolio.html">作品集</a>
+        <a href="diary.html">日记分享</a>
+        <a href="messages.html">留言板</a>
         <a href="nailong.html">奶龙表情包</a>
         <a class="active" href="genshin.html">原神下载</a>
         <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -22,16 +25,15 @@
     <section class="hero">
       <div class="badge">Official Download</div>
       <h1>原神下载入口</h1>
-      <p class="subtitle">页面会根据当前设备自动选择 PC、Android、iOS 或官方主页入口。</p>
+      <p class="subtitle">点击按钮会直接使用官方下载地址，不再跳转到介绍网页。</p>
       <div class="actions">
         <a class="button genshin" href="https://ys.mihoyo.com/main/" id="genshinDownloadButton">下载原神</a>
-        <a class="button secondary" href="https://ys.mihoyo.com/main/" target="_blank" rel="noopener noreferrer">打开官网</a>
       </div>
     </section>
 
     <section class="panel">
       <h2>说明</h2>
-      <p>这里保留了原来首页里的平台识别逻辑，只是把它拆到了独立的原神下载页和 <strong>assets/js/genshin.js</strong> 里。</p>
+      <p>Windows 会使用 PC 安装包地址，Android 会使用安卓安装包地址，iOS 会使用官方 iOS 下载入口。</p>
     </section>
 
     <footer>

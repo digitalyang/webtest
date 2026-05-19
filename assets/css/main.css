@@ -99,6 +99,11 @@ h1 {
   margin-top: 28px;
 }
 
+.actions.compact {
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -198,6 +203,105 @@ h1 {
 .card-content p {
   padding: 0;
   line-height: 1.7;
+}
+
+.info-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.info-list span {
+  padding: 8px 12px;
+  color: #0f766e;
+  background: #ccfbf1;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.timeline,
+.message-board {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.timeline-item,
+.message-form,
+.message-item {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow: 0 16px 35px rgba(39, 48, 67, 0.1);
+}
+
+.timeline-item time,
+.message-meta time {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.timeline-item h2 {
+  margin: 10px 0;
+}
+
+.timeline-item p,
+.message-item p {
+  margin: 0;
+  color: #5d6b82;
+  line-height: 1.8;
+}
+
+.message-form {
+  display: grid;
+  gap: 16px;
+}
+
+.message-form label {
+  display: grid;
+  gap: 8px;
+  color: #273043;
+  font-weight: 800;
+}
+
+.message-form input,
+.message-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  color: #273043;
+  background: #ffffff;
+  font: inherit;
+}
+
+.message-form input:focus,
+.message-form textarea:focus {
+  outline: 3px solid rgba(20, 184, 166, 0.22);
+  border-color: #14b8a6;
+}
+
+.messages {
+  display: grid;
+  gap: 14px;
+}
+
+.message-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 24px;
+  color: #6b7280;
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
 }
 
 .meme-panel {

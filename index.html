@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebTest 静态网页工程</title>
+  <title>个人主页</title>
   <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
   <main class="page">
     <nav class="navbar" aria-label="页面导航">
-      <a class="logo" href="index.html">WebTest</a>
+      <a class="logo" href="index.html">个人主页</a>
       <div class="nav-links">
         <a class="active" href="index.html">首页</a>
-        <a href="pages/pets.html">小猫小狗</a>
+        <a href="pages/about.html">个人简介</a>
+        <a href="pages/portfolio.html">作品集</a>
+        <a href="pages/diary.html">日记分享</a>
+        <a href="pages/messages.html">留言板</a>
         <a href="pages/nailong.html">奶龙表情包</a>
         <a href="pages/genshin.html">原神下载</a>
         <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -20,22 +23,45 @@
     </nav>
 
     <section class="hero">
-      <div class="badge">GitHub Pages is running</div>
-      <h1>WebTest 静态网页工程</h1>
-      <p class="subtitle">这个项目已经从单文件页面拆成多页面静态站点，方便继续扩展图片、脚本和页面。</p>
+      <div class="badge">Personal Website</div>
+      <h1>欢迎来到我的个人主页</h1>
+      <p class="subtitle">这里整理个人简介、作品集、日记分享、留言板，以及一些有趣的小功能。</p>
       <div class="actions">
-        <a class="button" href="pages/pets.html">查看小猫小狗</a>
+        <a class="button" href="pages/about.html">了解我</a>
+        <a class="button" href="pages/portfolio.html">查看作品集</a>
+        <a class="button" href="pages/diary.html">阅读日记</a>
+        <a class="button secondary" href="pages/messages.html">去留言</a>
         <a class="button" href="pages/nailong.html">获取奶龙表情包</a>
         <a class="button genshin" href="pages/genshin.html">下载原神</a>
-        <button class="button secondary" type="button" data-toast="按钮测试成功，页面交互正常。">点我测试按钮</button>
       </div>
     </section>
 
     <section class="card-grid" aria-label="功能入口">
-      <a class="card" href="pages/pets.html">
+      <a class="card" href="pages/about.html">
         <div class="card-content">
-          <h2>小猫小狗图片</h2>
-          <p>通用图片放到本地资源目录，测试 GitHub Pages 托管静态图片。</p>
+          <h2>个人简介</h2>
+          <p>放一些关于自己的介绍、技能方向、联系方式和当前关注的事情。</p>
+        </div>
+      </a>
+
+      <a class="card" href="pages/portfolio.html">
+        <div class="card-content">
+          <h2>作品集</h2>
+          <p>展示项目、网页、工具、自动化脚本或其它想长期保留的成果。</p>
+        </div>
+      </a>
+
+      <a class="card" href="pages/diary.html">
+        <div class="card-content">
+          <h2>日记分享</h2>
+          <p>记录学习、生活、部署网站和折腾技术过程中的想法。</p>
+        </div>
+      </a>
+
+      <a class="card" href="pages/messages.html">
+        <div class="card-content">
+          <h2>留言板</h2>
+          <p>纯静态留言板，留言会先保存在当前浏览器本地。</p>
         </div>
       </a>
 
@@ -49,18 +75,18 @@
       <a class="card" href="pages/genshin.html">
         <div class="card-content">
           <h2>原神下载</h2>
-          <p>按访问设备自动选择 PC、Android、iOS 或官网入口。</p>
+          <p>点击按钮后直接使用官方下载地址，不再跳转到介绍页。</p>
         </div>
       </a>
     </section>
 
     <section class="panel">
-      <h2>工程结构说明</h2>
-      <p>页面放在 <strong>pages</strong>，样式放在 <strong>assets/css</strong>，脚本放在 <strong>assets/js</strong>，本地图片放在 <strong>assets/images</strong>。</p>
+      <h2>站点说明</h2>
+      <p>这是一个纯静态个人站，适合部署到 GitHub Pages、Cloudflare Pages 或对象存储。后续可以继续把日记、作品和图片拆成更细的内容文件。</p>
     </section>
 
     <footer>
-      <p>Created for GitHub Pages test.</p>
+      <p>Created as a personal static website.</p>
     </footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

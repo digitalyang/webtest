@@ -4,6 +4,16 @@
 
 :root {
   --star-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5l3.9 8 8.8 1.3-6.4 6.2 1.5 8.8L16 22.6 8.2 26.8 9.7 18l-6.4-6.2 8.8-1.3z' fill='%23ffd76a' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, pointer;
+  --text: #e5edff;
+  --muted: #b6c3da;
+  --heading: #f8fafc;
+  --surface: rgba(15, 23, 42, 0.74);
+  --surface-strong: rgba(15, 23, 42, 0.9);
+  --surface-soft: rgba(30, 41, 59, 0.72);
+  --border: rgba(148, 163, 184, 0.28);
+  --border-bright: rgba(250, 204, 21, 0.28);
+  --accent: #facc15;
+  --accent-cyan: #67e8f9;
 }
 
 html {
@@ -14,7 +24,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: Arial, "Microsoft YaHei", sans-serif;
-  color: #eef2ff;
+  color: var(--text);
   cursor: var(--star-cursor);
   background:
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.95) 0 1px, transparent 2px),
@@ -55,15 +65,15 @@ textarea {
   gap: 16px;
   margin-bottom: 28px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  box-shadow: 0 12px 30px rgba(92, 113, 145, 0.12);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
 }
 
 .logo {
-  color: #273043;
+  color: var(--heading);
   font-weight: 800;
 }
 
@@ -77,24 +87,24 @@ textarea {
 .nav-links a {
   padding: 8px 12px;
   border-radius: 999px;
-  color: #dbeafe;
+  color: var(--muted);
   font-weight: 700;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: #0f766e;
-  background: #ccfbf1;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
 }
 
 .hero,
 .panel {
   padding: 40px 24px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 28px;
-  box-shadow: 0 20px 60px rgba(92, 113, 145, 0.16);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
 }
 
 .hero {
@@ -103,14 +113,14 @@ textarea {
 
 h1 {
   margin: 0 0 12px;
-  color: #ffffff;
+  color: var(--heading);
   font-size: clamp(2rem, 5vw, 4rem);
 }
 
 .subtitle {
   margin: 0;
   font-size: 1.15rem;
-  color: #cbd5e1;
+  color: var(--muted);
 }
 
 .actions {
@@ -134,29 +144,31 @@ h1 {
   padding: 0 18px;
   border: 0;
   border-radius: 999px;
-  color: #ffffff;
-  background: #14b8a6;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(20, 184, 166, 0.24);
+  box-shadow: 0 10px 28px rgba(103, 232, 249, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(20, 184, 166, 0.3);
+  box-shadow: 0 16px 34px rgba(250, 204, 21, 0.24);
 }
 
 .button.secondary {
-  color: #273043;
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(39, 48, 67, 0.1);
+  color: var(--heading);
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
 }
 
 .button.genshin {
-  background: #4f46e5;
-  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.24);
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  box-shadow: 0 10px 28px rgba(124, 58, 237, 0.28);
 }
 
 .button.genshin:hover {
@@ -170,8 +182,8 @@ h1 {
   margin-bottom: 20px;
   padding: 8px 14px;
   border-radius: 999px;
-  color: #0f766e;
-  background: #ccfbf1;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
   font-weight: 700;
 }
 
@@ -191,15 +203,17 @@ h1 {
 
 .card {
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
   border-radius: 22px;
-  box-shadow: 0 16px 35px rgba(39, 48, 67, 0.12);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 22px 45px rgba(39, 48, 67, 0.18);
+  border-color: var(--border-bright);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.36), 0 0 24px rgba(250, 204, 21, 0.08);
 }
 
 .card img {
@@ -213,12 +227,12 @@ h1 {
 .card p {
   margin: 0;
   padding: 16px 18px 20px;
-  color: #46556d;
+  color: var(--muted);
 }
 
 .card-content h2 {
   margin: 0 0 8px;
-  color: #273043;
+  color: var(--heading);
   font-size: 1.25rem;
 }
 
@@ -236,8 +250,8 @@ h1 {
 
 .info-list span {
   padding: 8px 12px;
-  color: #0f766e;
-  background: #ccfbf1;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
   border-radius: 999px;
   font-weight: 700;
 }
@@ -253,15 +267,15 @@ h1 {
 .message-form,
 .message-item {
   padding: 24px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
   border-radius: 22px;
-  box-shadow: 0 16px 35px rgba(39, 48, 67, 0.1);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
 }
 
 .timeline-item time,
 .message-meta time {
-  color: #6b7280;
+  color: #94a3b8;
   font-size: 0.95rem;
 }
 
@@ -272,7 +286,7 @@ h1 {
 .timeline-item p,
 .message-item p {
   margin: 0;
-  color: #5d6b82;
+  color: var(--muted);
   line-height: 1.8;
 }
 
@@ -284,7 +298,7 @@ h1 {
 .message-form label {
   display: grid;
   gap: 8px;
-  color: #273043;
+  color: var(--heading);
   font-weight: 800;
 }
 
@@ -292,17 +306,17 @@ h1 {
 .message-form textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 14px;
-  color: #273043;
-  background: #ffffff;
+  color: var(--text);
+  background: rgba(15, 23, 42, 0.78);
   font: inherit;
 }
 
 .message-form input:focus,
 .message-form textarea:focus {
-  outline: 3px solid rgba(20, 184, 166, 0.22);
-  border-color: #14b8a6;
+  outline: 3px solid rgba(250, 204, 21, 0.2);
+  border-color: var(--accent);
 }
 
 .messages {
@@ -321,8 +335,8 @@ h1 {
 .empty-state {
   margin: 0;
   padding: 24px;
-  color: #6b7280;
-  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  background: var(--surface-soft);
   border-radius: 18px;
 }
 
@@ -333,28 +347,28 @@ h1 {
   align-items: center;
   margin-top: 38px;
   padding: 28px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 24px;
-  box-shadow: 0 16px 35px rgba(39, 48, 67, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .meme-copy h2 {
   margin: 0 0 12px;
-  color: #273043;
+  color: var(--heading);
   font-size: clamp(1.5rem, 3vw, 2.3rem);
 }
 
 .meme-copy h1,
 .panel h2,
 .timeline-item h2 {
-  color: #273043;
+  color: var(--heading);
 }
 
 .meme-copy p,
 .panel p {
   margin: 0 0 22px;
-  color: #5d6b82;
+  color: var(--muted);
   line-height: 1.8;
 }
 
@@ -364,8 +378,8 @@ h1 {
   place-items: center;
   min-height: 360px;
   padding: 18px;
-  background: #fff7d6;
-  border: 2px dashed #fbbf24;
+  background: rgba(15, 23, 42, 0.72);
+  border: 2px dashed rgba(250, 204, 21, 0.5);
   border-radius: 22px;
   text-align: center;
 }
@@ -388,7 +402,7 @@ h1 {
 }
 
 .meme-placeholder {
-  color: #92400e;
+  color: var(--accent);
   font-weight: 800;
 }
 
@@ -398,7 +412,7 @@ h1 {
   bottom: 14px;
   left: 18px;
   margin: 0;
-  color: #92400e;
+  color: var(--accent);
   font-size: 0.95rem;
 }
 
@@ -408,10 +422,11 @@ h1 {
   bottom: 24px;
   max-width: calc(100% - 48px);
   padding: 14px 18px;
-  color: #ffffff;
-  background: #273043;
+  color: var(--heading);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  box-shadow: 0 16px 35px rgba(39, 48, 67, 0.2);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.34);
   opacity: 0;
   transform: translateY(16px);
   pointer-events: none;

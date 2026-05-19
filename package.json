@@ -1,12 +1,12 @@
 {
   "name": "webtest",
   "version": "1.0.0",
-  "description": "Personal static site with Cloudflare Pages Functions.",
+  "description": "Personal static site deployed with Cloudflare Workers and D1.",
   "scripts": {
     "build": "node scripts/build-static.js",
-    "dev": "npm run build && wrangler pages dev dist --compatibility-date=2026-05-19",
-    "pages:create": "wrangler pages project create webtest --production-branch=main",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name=webtest",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "version": "npm run build && wrangler versions upload",
     "d1:migrate:local": "wrangler d1 migrations apply webtest-db --local",
     "d1:migrate:remote": "wrangler d1 migrations apply webtest-db --remote"
   },

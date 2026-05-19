@@ -4,6 +4,7 @@
   "description": "Personal static site deployed with Cloudflare Workers and D1.",
   "scripts": {
     "build": "node scripts/build-static.js",
+    "test": "vitest run --environment jsdom",
     "dev": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
     "version": "npm run build && wrangler versions upload",
@@ -23,6 +24,13 @@
   },
   "homepage": "https://github.com/digitalyang/webtest#readme",
   "devDependencies": {
+    "esbuild": "^0.28.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.6",
     "wrangler": "^4.92.0"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.5",
+    "marked": "^18.0.4"
   }
 }

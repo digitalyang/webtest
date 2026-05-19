@@ -37,8 +37,9 @@
         </label>
         <label>
           留言
-          <textarea id="messageContent" rows="8" maxlength="3000" placeholder="写点什么吧，最多 3000 字" required></textarea>
+          <textarea id="messageContent" rows="8" maxlength="3000" placeholder="支持 Markdown，例如 **加粗**、列表、链接和代码块，最多 3000 字" required></textarea>
         </label>
+        <p class="form-hint">支持常用 Markdown 语法；原始 HTML 会被过滤后再展示。</p>
         <label class="honeypot" aria-hidden="true">
           个人网站
           <input id="messageWebsite" type="text" name="website" tabindex="-1" autocomplete="off">

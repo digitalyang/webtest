@@ -282,8 +282,7 @@ h1 {
   margin: 10px 0;
 }
 
-.timeline-item p,
-.message-item p {
+.timeline-item p {
   margin: 0;
   color: var(--muted);
   line-height: 1.8;
@@ -326,9 +325,88 @@ h1 {
   border-color: var(--accent);
 }
 
+.form-hint {
+  margin: -6px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 .messages {
   display: grid;
   gap: 14px;
+}
+
+.message-content {
+  color: var(--muted);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body blockquote,
+.markdown-body pre {
+  margin: 0 0 12px;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.35rem;
+}
+
+.markdown-body li + li {
+  margin-top: 4px;
+}
+
+.markdown-body a {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body blockquote {
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+  background: rgba(15, 23, 42, 0.45);
+  border-radius: 12px;
+}
+
+.markdown-body code {
+  padding: 2px 6px;
+  color: var(--heading);
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95em;
+}
+
+.markdown-body pre {
+  padding: 14px;
+  overflow-x: auto;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  background: transparent;
+  border: 0;
 }
 
 .stat-grid {

@@ -1,3 +1,5 @@
+import { renderMarkdown } from "./message-markdown.js";
+
 const messageForm = document.querySelector("#messageForm");
 const messageName = document.querySelector("#messageName");
 const messageContent = document.querySelector("#messageContent");
@@ -50,7 +52,7 @@ function renderMessages(messages) {
         <strong>${escapeText(message.name)}</strong>
         <time>${escapeText(formatBeijingTime(message.time))}</time>
       </div>
-      <p>${escapeText(message.content)}</p>
+      <div class="message-content markdown-body">${renderMarkdown(message.content)}</div>
     </article>
   `).join("");
 }

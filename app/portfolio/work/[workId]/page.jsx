@@ -9,16 +9,18 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }) {
-  const work = findWorkById(manifest, params.workId);
+export async function generateMetadata({ params }) {
+  const { workId } = await params;
+  const work = findWorkById(manifest, workId);
 
   return {
     title: `${work?.title || "作品详情"} - 个人主页`
   };
 }
 
-export default function PortfolioWorkPage({ params }) {
-  const work = findWorkById(manifest, params.workId);
+export default async function PortfolioWorkPage({ params }) {
+  const { workId } = await params;
+  const work = findWorkById(manifest, workId);
 
   if (!work) {
     return (

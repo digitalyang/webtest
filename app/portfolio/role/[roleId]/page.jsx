@@ -11,16 +11,18 @@ export function generateStaticParams() {
   );
 }
 
-export function generateMetadata({ params }) {
-  const result = findRoleById(manifest, params.roleId);
+export async function generateMetadata({ params }) {
+  const { roleId } = await params;
+  const result = findRoleById(manifest, roleId);
 
   return {
     title: `${result ? `${result.work.title} · ${result.role.title}` : "角色图片"} - 个人主页`
   };
 }
 
-export default function PortfolioRolePage({ params }) {
-  const result = findRoleById(manifest, params.roleId);
+export default async function PortfolioRolePage({ params }) {
+  const { roleId } = await params;
+  const result = findRoleById(manifest, roleId);
 
   if (!result) {
     return (

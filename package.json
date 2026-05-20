@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Personal static site deployed with Cloudflare Workers and D1.",
   "scripts": {
+    "normalize:images": "node scripts/normalize-portfolio-images.js",
+    "generate:portfolio": "node scripts/generate-portfolio-manifest.js",
+    "prebuild": "node scripts/generate-portfolio-manifest.js",
     "build": "node scripts/build-static.js",
     "test": "vitest run --environment jsdom",
     "dev": "npm run build && wrangler dev",

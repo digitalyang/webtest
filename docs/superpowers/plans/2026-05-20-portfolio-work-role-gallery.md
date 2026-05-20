@@ -1,5 +1,19 @@
 # Portfolio Work Role Gallery Implementation Plan
 
+> **Status (2026-05-20): Historical implementation plan, superseded by the Next.js Cloudflare refactor.**
+>
+> This plan describes the static HTML/JavaScript implementation that introduced the three-level gallery. The current implementation lives in:
+>
+> - Portfolio list: `app/portfolio/page.jsx`
+> - Work detail: `app/portfolio/work/[workId]/page.jsx`
+> - Role detail: `app/portfolio/role/[roleId]/page.jsx`
+> - Portfolio helpers: `lib/portfolio.js`
+> - React components: `components/portfolio/*`
+> - Manifest and assets: `public/assets/data/portfolio.json`, `public/assets/images/**`
+> - Generation scripts: `scripts/generate-portfolio-thumbnails.cjs`, `scripts/generate-portfolio-manifest.cjs`
+>
+> Old references below such as `pages/portfolio.html`, `portfolio-work.html?id=...`, `portfolio-role.html?id=...`, `assets/js/*`, `assets/data/*`, and `dist/` are retained only as historical context.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Rework the photography portfolio into a three-level gallery: portfolio list shows one thumbnail per work, work detail shows role thumbnails, and role detail loads JPEG originals in batches of five.

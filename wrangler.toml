@@ -1,9 +1,10 @@
 name = "webtest"
-main = "src/worker.js"
+main = ".open-next/worker.js"
 compatibility_date = "2026-05-19"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
 [assets]
-directory = "./dist"
+directory = ".open-next/assets"
 binding = "ASSETS"
 
 [[d1_databases]]

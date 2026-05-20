@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "description": "Personal static site deployed with Cloudflare Workers and D1.",
   "scripts": {
-    "normalize:images": "node scripts/normalize-portfolio-images.js",
-    "generate:portfolio-thumbs": "node scripts/generate-portfolio-thumbnails.js",
-    "generate:portfolio": "node scripts/generate-portfolio-manifest.js",
+    "normalize:images": "node scripts/normalize-portfolio-images.cjs",
+    "generate:portfolio-thumbs": "node scripts/generate-portfolio-thumbnails.cjs",
+    "generate:portfolio": "node scripts/generate-portfolio-manifest.cjs",
     "prebuild": "npm run generate:portfolio-thumbs && npm run generate:portfolio",
-    "build": "node scripts/build-static.js",
+    "build": "next build",
     "test": "vitest run --environment jsdom",
-    "dev": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
-    "version": "npm run build && wrangler versions upload",
+    "dev": "next dev",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "version": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "d1:migrate:local": "wrangler d1 migrations apply webtest-db --local",
     "d1:migrate:remote": "wrangler d1 migrations apply webtest-db --remote"
   },
@@ -22,7 +23,7 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/digitalyang/webtest/issues"
   },
@@ -34,8 +35,12 @@
     "wrangler": "^4.92.0"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "dompurify": "^3.4.5",
     "marked": "^18.0.4",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "sharp": "^0.34.5"
   }
 }

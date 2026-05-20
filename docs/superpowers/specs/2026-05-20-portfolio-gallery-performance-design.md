@@ -1,5 +1,19 @@
 # Portfolio Gallery Performance Design
 
+> **Status (2026-05-20): Historical / superseded by the Next.js Cloudflare refactor.**
+>
+> This document records the original static-site performance design. The current implementation uses Next.js App Router and OpenNext Cloudflare:
+>
+> - Portfolio list: `app/portfolio/page.jsx` -> `/portfolio`
+> - Work detail: `app/portfolio/work/[workId]/page.jsx` -> `/portfolio/work/[workId]`
+> - Role detail: `app/portfolio/role/[roleId]/page.jsx` -> `/portfolio/role/[roleId]`
+> - Shared helpers: `lib/portfolio.js`
+> - React components: `components/portfolio/*`
+> - Static assets and manifest: `public/assets/images/**`, `public/assets/data/portfolio.json`
+> - Generation scripts: `scripts/generate-portfolio-thumbnails.cjs`, `scripts/generate-portfolio-manifest.cjs`
+>
+> Old references below such as `pages/portfolio.html`, `assets/js/*`, `assets/data/*`, and `dist/` describe the pre-Next implementation only.
+
 ## Goal
 
 Improve portfolio image loading performance while keeping all original images available from the site and GitHub repository.

@@ -1,30 +1,26 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  findRoleById,
+  findWorkById,
+  getImageBatch,
+  getRoleHref,
   getWorkHref,
   resolveImageSrc,
-  renderPhotographyWorks
-} from "../assets/js/portfolio.js";
-import {
-  findWorkById,
-  getRoleHref,
-  renderWorkRoles
-} from "../assets/js/portfolio-work.js";
-import {
-  findRoleById,
-  getImageBatch,
+  renderPhotographyWorks,
+  renderWorkRoles,
   renderRoleImages
-} from "../assets/js/portfolio-role.js";
+} from "../lib/portfolio.js";
 
 describe("portfolio navigation", () => {
   test("resolves page-relative asset paths", () => {
     expect(resolveImageSrc("assets/images/HOK/Daji/Daji_1.thumb.webp")).toBe(
-      "../assets/images/HOK/Daji/Daji_1.thumb.webp"
+      "/assets/images/HOK/Daji/Daji_1.thumb.webp"
     );
   });
 
   test("creates work detail links", () => {
-    expect(getWorkHref("hok")).toBe("portfolio-work.html?id=hok");
+    expect(getWorkHref("hok")).toBe("/portfolio/work/hok");
   });
 
   test("renders only one cover image per work", () => {
@@ -51,7 +47,7 @@ describe("portfolio navigation", () => {
     expect(html.match(/<img/g)).toHaveLength(1);
     expect(html).toContain("Daji_1.thumb.webp");
     expect(html).not.toContain("Daji_2.jpeg");
-    expect(html).toContain("portfolio-work.html?id=hok");
+    expect(html).toContain("/portfolio/work/hok");
   });
 });
 
@@ -80,7 +76,7 @@ describe("portfolio work page", () => {
   });
 
   test("creates role detail links", () => {
-    expect(getRoleHref("hok-daji")).toBe("portfolio-role.html?id=hok-daji");
+    expect(getRoleHref("hok-daji")).toBe("/portfolio/role/hok-daji");
   });
 
   test("renders role covers only", () => {
@@ -88,7 +84,7 @@ describe("portfolio work page", () => {
 
     expect(html).toContain("Daji_1.thumb.webp");
     expect(html).not.toContain("Daji_1.jpeg");
-    expect(html).toContain("portfolio-role.html?id=hok-daji");
+    expect(html).toContain("/portfolio/role/hok-daji");
     expect(html).toContain("4 张图片");
   });
 });

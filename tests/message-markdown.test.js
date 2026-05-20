@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { renderMarkdown } from "../assets/js/message-markdown.js";
+import { renderMarkdown } from "../lib/message-markdown.js";
 
 describe("renderMarkdown", () => {
   test("renders common Markdown formatting", () => {

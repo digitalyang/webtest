@@ -1,5 +1,18 @@
 # 留言板轻量防护设计
 
+> **状态（2026-05-20）：历史设计，已迁移到 Next.js + OpenNext Cloudflare。**
+>
+> 本文记录的是静态站 + Cloudflare Worker 阶段的留言板防护设计。当前实现位置：
+>
+> - 页面入口：`app/messages/page.jsx`
+> - 留言客户端组件：`components/MessagesBoard.jsx`
+> - Markdown 安全渲染：`lib/message-markdown.js`
+> - D1 API helper：`lib/server/messages.js`
+> - Next Route Handler：`app/api/messages/route.js`
+> - D1 迁移：`migrations/0001_init.sql`、`migrations/0002_message_abuse_protection.sql`
+>
+> 下文中的 `pages/messages.html`、`assets/js/messages.js`、`src/worker.js` 是历史路径；行为要求仍然有效，但实现已迁到上述 Next.js 文件。
+
 ## 背景
 
 当前留言板通过 Cloudflare Worker 的 `/api/messages` 写入 D1，前端 `assets/js/messages.js` 调用接口发布和读取留言。现有保护包括：

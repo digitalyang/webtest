@@ -1,5 +1,18 @@
 # 作品集图片画廊 Implementation Plan
 
+> **状态（2026-05-20）：历史实施计划，已被 Next.js Cloudflare 重构后的结构取代。**
+>
+> 这份计划描述的是旧静态站阶段的图片迁移和画廊实现。当前实现已经迁移：
+>
+> - 图片源和缩略图：`public/assets/images/**`
+> - Manifest：`public/assets/data/portfolio.json`
+> - 生成脚本：`scripts/normalize-portfolio-images.cjs`、`scripts/generate-portfolio-thumbnails.cjs`、`scripts/generate-portfolio-manifest.cjs`
+> - 作品集页面：`app/portfolio/page.jsx`
+> - 作品/角色详情：`app/portfolio/work/[workId]/page.jsx`、`app/portfolio/role/[roleId]/page.jsx`
+> - 作品集逻辑：`lib/portfolio.js`、`components/portfolio/*`
+>
+> 下文中的 `assets/images`、`assets/data`、`assets/js`、`pages/*.html`、`dist`、`build-static.js` 均为历史路径，仅用于追溯当时的设计与迁移过程。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将 `dist/assets/images` 中 39 张微信导出图片迁移到 Git 可追踪的 `assets/images/`，统一重命名为 `{角色名}_{序号}.jpeg`，并在作品集页面按「摄影 / 代码 / 手绘」三大类展示；GitHub 仓库作为图片网盘。

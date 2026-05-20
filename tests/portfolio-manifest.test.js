@@ -2,8 +2,12 @@ import { describe, expect, test } from "vitest";
 import fs from "fs";
 import path from "path";
 
-const manifestPath = path.join(process.cwd(), "assets/data/portfolio.json");
+const manifestPath = path.join(process.cwd(), "public/assets/data/portfolio.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+
+function publicAssetPath(assetPath) {
+  return path.join(process.cwd(), "public", assetPath);
+}
 
 describe("portfolio manifest", () => {
   test("groups photography into works and roles", () => {
@@ -17,12 +21,12 @@ describe("portfolio manifest", () => {
 
   test("every role image and thumbnail exists on disk", () => {
     for (const work of manifest.photographyWorks) {
-      expect(fs.existsSync(path.join(process.cwd(), work.coverThumb))).toBe(true);
+      expect(fs.existsSync(publicAssetPath(work.coverThumb))).toBe(true);
       for (const role of work.roles) {
-        expect(fs.existsSync(path.join(process.cwd(), role.coverThumb))).toBe(true);
+        expect(fs.existsSync(publicAssetPath(role.coverThumb))).toBe(true);
         for (const image of role.images) {
           expect(image.src).not.toContain(".thumb.");
-          expect(fs.existsSync(path.join(process.cwd(), image.src))).toBe(true);
+          expect(fs.existsSync(publicAssetPath(image.src))).toBe(true);
         }
       }
     }

@@ -53,10 +53,16 @@ npm run generate:portfolio-thumbs
 npm run generate:portfolio
 ```
 
-生产构建：
+生产构建并生成 OpenNext Cloudflare 产物：
 
 ```sh
 npm run build
+```
+
+仅运行 Next.js 构建：
+
+```sh
+npm run build:next
 ```
 
 Cloudflare Workers Runtime 本地预览：
@@ -96,6 +102,15 @@ npm test
 ```sh
 npm run deploy
 ```
+
+如果 Cloudflare 控制台使用分离的 Build / Deploy 命令，请使用：
+
+```text
+Build command: npm run build
+Deploy command: npx wrangler deploy
+```
+
+`npm run build` 会同时生成 `.next/` 和 `.open-next/`，所以后续 `wrangler deploy` 可以找到 OpenNext 编译产物。
 
 上传 Worker 版本但不立即发布：
 

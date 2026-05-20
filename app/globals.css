@@ -732,6 +732,128 @@ footer {
   display: none;
 }
 
+.about-profile {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.about-identity,
+.about-section {
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.about-identity {
+  position: sticky;
+  top: 110px;
+}
+
+.about-identity h1 {
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 1.12;
+}
+
+.about-content {
+  display: grid;
+  gap: 22px;
+}
+
+.section-kicker {
+  margin-bottom: 10px;
+  color: var(--accent-cyan);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.about-section h2,
+.about-tag-group h3,
+.about-experience-card h3 {
+  color: var(--heading);
+}
+
+.about-section h2 {
+  margin: 0 0 14px;
+}
+
+.about-section p,
+.about-watch-list p,
+.about-experience-card p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.about-tag-group + .about-tag-group,
+.about-watch-list {
+  margin-top: 18px;
+}
+
+.about-tag-group h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.about-identity .about-tags {
+  margin-top: 20px;
+}
+
+.about-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.about-tag-icon {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  color: var(--heading);
+  background: rgba(15, 23, 42, 0.78);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.about-tech-grid,
+.about-experience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.about-tech-grid .about-tag-group + .about-tag-group {
+  margin-top: 0;
+}
+
+.about-experience-card {
+  padding: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
 @media (max-width: 640px) {
   .navbar {
     align-items: flex-start;
@@ -741,6 +863,19 @@ footer {
 
   .nav-links {
     justify-content: flex-start;
+  }
+
+  .about-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .about-identity {
+    position: static;
+  }
+
+  .about-identity,
+  .about-section {
+    padding: 24px;
   }
 
   .meme-panel {

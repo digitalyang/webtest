@@ -4,8 +4,8 @@ import NavBar from "../components/NavBar";
 import ToastProvider from "../components/ToastProvider";
 
 export const metadata = {
-  title: "个人主页",
-  description: "个人主页、作品集、日记分享、留言板和访问统计。"
+  title: "DigitalSheep",
+  description: "DigitalSheep 的个人主页，记录嵌入式开发、摄影、游戏、动漫、作品集和学习轨迹。"
 };
 
 export default function RootLayout({ children }) {

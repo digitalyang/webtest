@@ -4,9 +4,9 @@ export default function HomePage() {
   return (
     <>
       <section className="hero">
-        <div className="badge">Personal Website</div>
-        <h1>欢迎来到我的个人主页</h1>
-        <p className="subtitle">这里整理个人简介、作品集、日记分享、留言板，以及一些有趣的小功能。</p>
+        <div className="badge">DigitalSheep</div>
+        <h1>欢迎来到 DigitalSheep 的个人主页</h1>
+        <p className="subtitle">不玩游戏不看动漫的嵌入式开发者不是一个好的摄影师。这里整理作品集、日记、留言板，以及一些折腾出来的小功能。</p>
         <div className="actions">
           <Link className="button" href="/about">
             了解我
@@ -33,7 +33,7 @@ export default function HomePage() {
         <Link className="card" href="/about">
           <div className="card-content">
             <h2>个人简介</h2>
-            <p>放一些关于自己的介绍、技能方向、联系方式和当前关注的事情。</p>
+            <p>认识 DigitalSheep：嵌入式开发、摄影、游戏、动漫，以及正在关注的自动驾驶、AI 和智能硬件。</p>
           </div>
         </Link>
 

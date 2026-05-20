@@ -1,64 +1,99 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = process.cwd();
+const root = path.resolve(__dirname, "..");
 const imagesRoot = path.join(root, "assets/images");
 const outputPath = path.join(root, "assets/data/portfolio.json");
-const imageExt = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+const sourceExt = new Set([".jpg", ".jpeg", ".png", ".gif"]);
+const ignoredPattern = /webwxgetmsgimg|_cgi-bin/i;
 
-function isImage(fileName) {
-  return imageExt.has(path.extname(fileName).toLowerCase());
+function isSourceImage(fileName) {
+  const ext = path.extname(fileName).toLowerCase();
+  return sourceExt.has(ext) && !fileName.includes(".thumb.") && !ignoredPattern.test(fileName);
 }
 
-function categoryForPath(relDir) {
-  if (relDir.startsWith("drawings")) return "drawing";
-  return "photography";
+function sortByName(a, b) {
+  return a.localeCompare(b, undefined, { numeric: true });
 }
 
-function collectAlbumDirs(dir, base = "") {
-  const albums = [];
-  if (!fs.existsSync(dir)) return albums;
-
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name === ".DS_Store") continue;
-    const relDir = base ? `${base}/${entry.name}` : entry.name;
-    const fullDir = path.join(dir, entry.name);
-    const images = fs.readdirSync(fullDir).filter(isImage).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-    const childDirs = fs
-      .readdirSync(fullDir, { withFileTypes: true })
-      .filter((e) => e.isDirectory() && e.name !== ".DS_Store");
-
-    if (images.length > 0 && childDirs.length === 0) {
-      albums.push({ relDir, images });
-    } else {
-      albums.push(...collectAlbumDirs(fullDir, relDir));
-    }
-  }
-  return albums;
+function slug(value) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
-function albumFromDir(relDir, files) {
-  const parts = relDir.split("/");
-  const character = parts[parts.length - 1];
-  const franchise = parts.length > 1 ? parts[0] : character;
-  const id = relDir.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  const title = parts.length > 1 ? `${franchise} · ${character}` : character;
+function imageToThumb(src) {
+  const parsed = path.parse(src);
+  return `${parsed.dir}/${parsed.name}.thumb.webp`.replaceAll(path.sep, "/");
+}
+
+function listDirectories(dir) {
+  if (!fs.existsSync(dir)) return [];
+
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== ".DS_Store")
+    .map((entry) => entry.name)
+    .sort(sortByName);
+}
+
+function listImages(dir) {
+  return fs.readdirSync(dir).filter(isSourceImage).sort(sortByName);
+}
+
+function createRole(workName, roleName, relDir) {
+  const fullDir = path.join(imagesRoot, relDir);
+  const files = listImages(fullDir);
+  if (files.length === 0) return null;
+
+  const workId = slug(workName);
+  const roleId = `${workId}-${slug(roleName)}`;
+  const images = files.map((file, index) => ({
+    src: `assets/images/${relDir}/${file}`,
+    alt: `${workName} ${roleName} ${index + 1}`
+  }));
+  const coverThumb = imageToThumb(images[0].src);
 
   return {
-    id,
-    category: categoryForPath(relDir),
-    title,
-    cover: `assets/images/${relDir}/${files[0]}`,
-    images: files.map((f, i) => ({
-      src: `assets/images/${relDir}/${f}`,
-      alt: `${title} ${i + 1}`
-    }))
+    id: roleId,
+    workId,
+    title: roleName,
+    coverThumb,
+    imageCount: images.length,
+    images
   };
 }
 
-const albumDirs = collectAlbumDirs(imagesRoot);
-const albums = albumDirs.map(({ relDir, images }) => albumFromDir(relDir, images));
+function createWork(workName) {
+  const workDir = path.join(imagesRoot, workName);
+  const childDirs = listDirectories(workDir);
+  const directImages = listImages(workDir);
+
+  const roleNames = childDirs.length > 0 ? childDirs : directImages.length > 0 ? [workName] : [];
+  const roles = roleNames
+    .map((roleName) => {
+      const relDir = childDirs.length > 0 ? `${workName}/${roleName}` : workName;
+      return createRole(workName, roleName, relDir);
+    })
+    .filter(Boolean);
+
+  if (roles.length === 0) return null;
+
+  const imageCount = roles.reduce((sum, role) => sum + role.imageCount, 0);
+
+  return {
+    id: slug(workName),
+    category: "photography",
+    title: workName,
+    coverThumb: roles[0].coverThumb,
+    roleCount: roles.length,
+    imageCount,
+    roles
+  };
+}
+
+const photographyWorks = listDirectories(imagesRoot).map(createWork).filter(Boolean);
 
 const manifest = {
   categories: [
@@ -66,7 +101,7 @@ const manifest = {
     { id: "code", title: "代码", description: "网站与工具项目" },
     { id: "drawing", title: "手绘", description: "插画与手绘草稿" }
   ],
-  albums,
+  photographyWorks,
   projects: [
     {
       category: "code",
@@ -91,4 +126,4 @@ const manifest = {
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, `${JSON.stringify(manifest, null, 2)}\n`);
-console.log(`Wrote ${path.relative(root, outputPath)} (${albums.length} albums)`);
+console.log(`Wrote ${path.relative(root, outputPath)} (${photographyWorks.length} works)`);

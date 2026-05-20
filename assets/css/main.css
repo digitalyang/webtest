@@ -683,6 +683,55 @@ footer {
   text-align: center;
 }
 
+.portfolio-work-grid,
+.portfolio-role-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.portfolio-work-card,
+.portfolio-role-card {
+  position: relative;
+  min-height: 220px;
+  color: var(--heading);
+  text-decoration: none;
+  background: var(--surface-soft);
+}
+
+.portfolio-card-text {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.86) 100%);
+}
+
+.portfolio-card-text strong,
+.portfolio-card-text small {
+  color: var(--heading);
+}
+
+.portfolio-original-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.portfolio-original-thumb {
+  aspect-ratio: 3 / 4;
+}
+
+.portfolio-load-more {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.portfolio-load-more .button[hidden] {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .navbar {
     align-items: flex-start;

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作品详情 - 个人主页</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+  <main class="page">
+    <nav class="navbar" aria-label="页面导航">
+      <a class="logo" href="../index.html">个人主页</a>
+      <div class="nav-links">
+        <a href="../index.html">首页</a>
+        <a href="about.html">个人简介</a>
+        <a class="active" href="portfolio.html">作品集</a>
+        <a href="diary.html">日记分享</a>
+        <a href="messages.html">留言板</a>
+        <a href="stats.html">访问统计</a>
+        <a href="nailong.html">奶龙表情包</a>
+        <a href="https://ys.mihoyo.com/main/" data-genshin-download>原神下载</a>
+        <a href="https://github.com/digitalyang/webtest" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="badge">Portfolio</div>
+      <h1 id="workTitle">作品详情</h1>
+      <p class="subtitle" id="workSubtitle">选择角色查看图片。</p>
+    </section>
+
+    <div id="portfolioWorkApp" class="portfolio-app" aria-live="polite"></div>
+
+    <footer>
+      <p><a href="portfolio.html">返回作品集</a></p>
+    </footer>
+  </main>
+  <script type="module" src="../assets/js/portfolio-work.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

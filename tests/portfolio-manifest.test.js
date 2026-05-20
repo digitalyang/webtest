@@ -2,29 +2,43 @@ import { describe, expect, test } from "vitest";
 import fs from "fs";
 import path from "path";
 
-import { resolveImageSrc, groupAlbumsByCategory } from "../assets/js/portfolio.js";
-
 const manifestPath = path.join(process.cwd(), "assets/data/portfolio.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
 describe("portfolio manifest", () => {
-  test("every photography image file exists on disk", () => {
-    for (const album of manifest.albums.filter((a) => a.category === "photography")) {
-      for (const image of album.images) {
-        expect(fs.existsSync(path.join(process.cwd(), image.src))).toBe(true);
+  test("groups photography into works and roles", () => {
+    expect(Array.isArray(manifest.photographyWorks)).toBe(true);
+    const hok = manifest.photographyWorks.find((work) => work.id === "hok");
+
+    expect(hok.title).toBe("HOK");
+    expect(hok.roles.map((role) => role.id)).toEqual(["hok-daji", "hok-haiyue"]);
+    expect(hok.coverThumb).toBe(hok.roles[0].coverThumb);
+  });
+
+  test("every role image and thumbnail exists on disk", () => {
+    for (const work of manifest.photographyWorks) {
+      expect(fs.existsSync(path.join(process.cwd(), work.coverThumb))).toBe(true);
+      for (const role of work.roles) {
+        expect(fs.existsSync(path.join(process.cwd(), role.coverThumb))).toBe(true);
+        for (const image of role.images) {
+          expect(image.src).not.toContain(".thumb.");
+          expect(fs.existsSync(path.join(process.cwd(), image.src))).toBe(true);
+        }
       }
     }
   });
 
-  test("resolveImageSrc prefixes pages/ correctly", () => {
-    expect(resolveImageSrc("assets/images/FGO/Nero/Nero_1.jpeg")).toBe(
-      "../assets/images/FGO/Nero/Nero_1.jpeg"
-    );
+  test("does not include duplicate wechat file names", () => {
+    const serialized = JSON.stringify(manifest);
+    expect(serialized).not.toContain("webwxgetmsgimg");
+    expect(serialized).not.toContain("_cgi-bin");
   });
 
-  test("groupAlbumsByCategory buckets albums", () => {
-    const grouped = groupAlbumsByCategory(manifest.albums);
-    expect(grouped.photography.length).toBeGreaterThan(0);
-    expect(grouped.drawing ?? []).toHaveLength(0);
+  test("single-level folders become one-role works", () => {
+    const lolita = manifest.photographyWorks.find((work) => work.id === "lolita");
+
+    expect(lolita.roles).toHaveLength(1);
+    expect(lolita.roles[0].id).toBe("lolita-lolita");
+    expect(lolita.roles[0].title).toBe("Lolita");
   });
 });

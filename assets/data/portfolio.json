@@ -16,136 +16,193 @@
       "description": "插画与手绘草稿"
     }
   ],
-  "albums": [
+  "photographyWorks": [
     {
-      "id": "fgo-nero",
+      "id": "fgo",
       "category": "photography",
-      "title": "FGO · Nero",
-      "cover": "assets/images/FGO/Nero/Nero_1.jpeg",
-      "images": [
+      "title": "FGO",
+      "coverThumb": "assets/images/FGO/Nero/Nero_1.thumb.webp",
+      "roleCount": 1,
+      "imageCount": 2,
+      "roles": [
         {
-          "src": "assets/images/FGO/Nero/Nero_1.jpeg",
-          "alt": "FGO · Nero 1"
-        },
-        {
-          "src": "assets/images/FGO/Nero/Nero_2.jpeg",
-          "alt": "FGO · Nero 2"
+          "id": "fgo-nero",
+          "workId": "fgo",
+          "title": "Nero",
+          "coverThumb": "assets/images/FGO/Nero/Nero_1.thumb.webp",
+          "imageCount": 2,
+          "images": [
+            {
+              "src": "assets/images/FGO/Nero/Nero_1.jpeg",
+              "alt": "FGO Nero 1"
+            },
+            {
+              "src": "assets/images/FGO/Nero/Nero_2.jpeg",
+              "alt": "FGO Nero 2"
+            }
+          ]
         }
       ]
     },
     {
-      "id": "girlsbandcry-nina",
+      "id": "girlsbandcry",
       "category": "photography",
-      "title": "GirlsBandCry · Nina",
-      "cover": "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
-      "images": [
+      "title": "GirlsBandCry",
+      "coverThumb": "assets/images/GirlsBandCry/Nina/Nina_1.thumb.webp",
+      "roleCount": 1,
+      "imageCount": 4,
+      "roles": [
         {
-          "src": "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
-          "alt": "GirlsBandCry · Nina 1"
-        },
-        {
-          "src": "assets/images/GirlsBandCry/Nina/Nina_2.jpeg",
-          "alt": "GirlsBandCry · Nina 2"
-        },
-        {
-          "src": "assets/images/GirlsBandCry/Nina/Nina_3.jpeg",
-          "alt": "GirlsBandCry · Nina 3"
-        },
-        {
-          "src": "assets/images/GirlsBandCry/Nina/Nina_4.jpeg",
-          "alt": "GirlsBandCry · Nina 4"
+          "id": "girlsbandcry-nina",
+          "workId": "girlsbandcry",
+          "title": "Nina",
+          "coverThumb": "assets/images/GirlsBandCry/Nina/Nina_1.thumb.webp",
+          "imageCount": 4,
+          "images": [
+            {
+              "src": "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+              "alt": "GirlsBandCry Nina 1"
+            },
+            {
+              "src": "assets/images/GirlsBandCry/Nina/Nina_2.jpeg",
+              "alt": "GirlsBandCry Nina 2"
+            },
+            {
+              "src": "assets/images/GirlsBandCry/Nina/Nina_3.jpeg",
+              "alt": "GirlsBandCry Nina 3"
+            },
+            {
+              "src": "assets/images/GirlsBandCry/Nina/Nina_4.jpeg",
+              "alt": "GirlsBandCry Nina 4"
+            }
+          ]
         }
       ]
     },
     {
-      "id": "hok-daji",
+      "id": "hok",
       "category": "photography",
-      "title": "HOK · Daji",
-      "cover": "assets/images/HOK/Daji/Daji_1.jpeg",
-      "images": [
+      "title": "HOK",
+      "coverThumb": "assets/images/HOK/Daji/Daji_1.thumb.webp",
+      "roleCount": 2,
+      "imageCount": 7,
+      "roles": [
         {
-          "src": "assets/images/HOK/Daji/Daji_1.jpeg",
-          "alt": "HOK · Daji 1"
+          "id": "hok-daji",
+          "workId": "hok",
+          "title": "Daji",
+          "coverThumb": "assets/images/HOK/Daji/Daji_1.thumb.webp",
+          "imageCount": 4,
+          "images": [
+            {
+              "src": "assets/images/HOK/Daji/Daji_1.jpeg",
+              "alt": "HOK Daji 1"
+            },
+            {
+              "src": "assets/images/HOK/Daji/Daji_2.jpeg",
+              "alt": "HOK Daji 2"
+            },
+            {
+              "src": "assets/images/HOK/Daji/Daji_3.jpeg",
+              "alt": "HOK Daji 3"
+            },
+            {
+              "src": "assets/images/HOK/Daji/Daji_4.jpeg",
+              "alt": "HOK Daji 4"
+            }
+          ]
         },
         {
-          "src": "assets/images/HOK/Daji/Daji_2.jpeg",
-          "alt": "HOK · Daji 2"
-        },
-        {
-          "src": "assets/images/HOK/Daji/Daji_3.jpeg",
-          "alt": "HOK · Daji 3"
-        },
-        {
-          "src": "assets/images/HOK/Daji/Daji_4.jpeg",
-          "alt": "HOK · Daji 4"
+          "id": "hok-haiyue",
+          "workId": "hok",
+          "title": "Haiyue",
+          "coverThumb": "assets/images/HOK/Haiyue/Haiyue_1.thumb.webp",
+          "imageCount": 3,
+          "images": [
+            {
+              "src": "assets/images/HOK/Haiyue/Haiyue_1.jpeg",
+              "alt": "HOK Haiyue 1"
+            },
+            {
+              "src": "assets/images/HOK/Haiyue/Haiyue_2.jpeg",
+              "alt": "HOK Haiyue 2"
+            },
+            {
+              "src": "assets/images/HOK/Haiyue/Haiyue_3.jpeg",
+              "alt": "HOK Haiyue 3"
+            }
+          ]
         }
       ]
     },
     {
-      "id": "hok-haiyue",
+      "id": "honkai-starrail",
       "category": "photography",
-      "title": "HOK · Haiyue",
-      "cover": "assets/images/HOK/Haiyue/Haiyue_1.jpeg",
-      "images": [
+      "title": "Honkai_StarRail",
+      "coverThumb": "assets/images/Honkai_StarRail/Cyrene/Cyrene_1.thumb.webp",
+      "roleCount": 1,
+      "imageCount": 3,
+      "roles": [
         {
-          "src": "assets/images/HOK/Haiyue/Haiyue_1.jpeg",
-          "alt": "HOK · Haiyue 1"
-        },
-        {
-          "src": "assets/images/HOK/Haiyue/Haiyue_2.jpeg",
-          "alt": "HOK · Haiyue 2"
-        },
-        {
-          "src": "assets/images/HOK/Haiyue/Haiyue_3.jpeg",
-          "alt": "HOK · Haiyue 3"
+          "id": "honkai-starrail-cyrene",
+          "workId": "honkai-starrail",
+          "title": "Cyrene",
+          "coverThumb": "assets/images/Honkai_StarRail/Cyrene/Cyrene_1.thumb.webp",
+          "imageCount": 3,
+          "images": [
+            {
+              "src": "assets/images/Honkai_StarRail/Cyrene/Cyrene_1.jpeg",
+              "alt": "Honkai_StarRail Cyrene 1"
+            },
+            {
+              "src": "assets/images/Honkai_StarRail/Cyrene/Cyrene_2.jpeg",
+              "alt": "Honkai_StarRail Cyrene 2"
+            },
+            {
+              "src": "assets/images/Honkai_StarRail/Cyrene/Cyrene_3.jpeg",
+              "alt": "Honkai_StarRail Cyrene 3"
+            }
+          ]
         }
       ]
     },
     {
-      "id": "honkai3-elysia",
+      "id": "honkai3",
       "category": "photography",
-      "title": "Honkai3 · Elysia",
-      "cover": "assets/images/Honkai3/Elysia/Elysia_1.jpeg",
-      "images": [
+      "title": "Honkai3",
+      "coverThumb": "assets/images/Honkai3/Elysia/Elysia_1.thumb.webp",
+      "roleCount": 2,
+      "imageCount": 3,
+      "roles": [
         {
-          "src": "assets/images/Honkai3/Elysia/Elysia_1.jpeg",
-          "alt": "Honkai3 · Elysia 1"
-        }
-      ]
-    },
-    {
-      "id": "honkai3-sakura",
-      "category": "photography",
-      "title": "Honkai3 · Sakura",
-      "cover": "assets/images/Honkai3/Sakura/Sakura_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/Honkai3/Sakura/Sakura_1.jpeg",
-          "alt": "Honkai3 · Sakura 1"
+          "id": "honkai3-elysia",
+          "workId": "honkai3",
+          "title": "Elysia",
+          "coverThumb": "assets/images/Honkai3/Elysia/Elysia_1.thumb.webp",
+          "imageCount": 1,
+          "images": [
+            {
+              "src": "assets/images/Honkai3/Elysia/Elysia_1.jpeg",
+              "alt": "Honkai3 Elysia 1"
+            }
+          ]
         },
         {
-          "src": "assets/images/Honkai3/Sakura/Sakura_2.jpeg",
-          "alt": "Honkai3 · Sakura 2"
-        }
-      ]
-    },
-    {
-      "id": "honkai-starrail-cyrene",
-      "category": "photography",
-      "title": "Honkai_StarRail · Cyrene",
-      "cover": "assets/images/Honkai_StarRail/Cyrene/Cyrene_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/Honkai_StarRail/Cyrene/Cyrene_1.jpeg",
-          "alt": "Honkai_StarRail · Cyrene 1"
-        },
-        {
-          "src": "assets/images/Honkai_StarRail/Cyrene/Cyrene_2.jpeg",
-          "alt": "Honkai_StarRail · Cyrene 2"
-        },
-        {
-          "src": "assets/images/Honkai_StarRail/Cyrene/Cyrene_3.jpeg",
-          "alt": "Honkai_StarRail · Cyrene 3"
+          "id": "honkai3-sakura",
+          "workId": "honkai3",
+          "title": "Sakura",
+          "coverThumb": "assets/images/Honkai3/Sakura/Sakura_1.thumb.webp",
+          "imageCount": 2,
+          "images": [
+            {
+              "src": "assets/images/Honkai3/Sakura/Sakura_1.jpeg",
+              "alt": "Honkai3 Sakura 1"
+            },
+            {
+              "src": "assets/images/Honkai3/Sakura/Sakura_2.jpeg",
+              "alt": "Honkai3 Sakura 2"
+            }
+          ]
         }
       ]
     },
@@ -153,31 +210,53 @@
       "id": "lolita",
       "category": "photography",
       "title": "Lolita",
-      "cover": "assets/images/Lolita/Lolita_1.jpeg",
-      "images": [
+      "coverThumb": "assets/images/Lolita/Lolita_1.thumb.webp",
+      "roleCount": 1,
+      "imageCount": 3,
+      "roles": [
         {
-          "src": "assets/images/Lolita/Lolita_1.jpeg",
-          "alt": "Lolita 1"
-        },
-        {
-          "src": "assets/images/Lolita/Lolita_2.jpeg",
-          "alt": "Lolita 2"
-        },
-        {
-          "src": "assets/images/Lolita/Lolita_3.jpeg",
-          "alt": "Lolita 3"
+          "id": "lolita-lolita",
+          "workId": "lolita",
+          "title": "Lolita",
+          "coverThumb": "assets/images/Lolita/Lolita_1.thumb.webp",
+          "imageCount": 3,
+          "images": [
+            {
+              "src": "assets/images/Lolita/Lolita_1.jpeg",
+              "alt": "Lolita Lolita 1"
+            },
+            {
+              "src": "assets/images/Lolita/Lolita_2.jpeg",
+              "alt": "Lolita Lolita 2"
+            },
+            {
+              "src": "assets/images/Lolita/Lolita_3.jpeg",
+              "alt": "Lolita Lolita 3"
+            }
+          ]
         }
       ]
     },
     {
-      "id": "madokamagica-madoka",
+      "id": "madokamagica",
       "category": "photography",
-      "title": "MadokaMagica · Madoka",
-      "cover": "assets/images/MadokaMagica/Madoka/Madoka_1.jpeg",
-      "images": [
+      "title": "MadokaMagica",
+      "coverThumb": "assets/images/MadokaMagica/Madoka/Madoka_1.thumb.webp",
+      "roleCount": 1,
+      "imageCount": 1,
+      "roles": [
         {
-          "src": "assets/images/MadokaMagica/Madoka/Madoka_1.jpeg",
-          "alt": "MadokaMagica · Madoka 1"
+          "id": "madokamagica-madoka",
+          "workId": "madokamagica",
+          "title": "Madoka",
+          "coverThumb": "assets/images/MadokaMagica/Madoka/Madoka_1.thumb.webp",
+          "imageCount": 1,
+          "images": [
+            {
+              "src": "assets/images/MadokaMagica/Madoka/Madoka_1.jpeg",
+              "alt": "MadokaMagica Madoka 1"
+            }
+          ]
         }
       ]
     },
@@ -185,119 +264,146 @@
       "id": "miku",
       "category": "photography",
       "title": "Miku",
-      "cover": "assets/images/Miku/Miku_1.jpeg",
-      "images": [
+      "coverThumb": "assets/images/Miku/Miku_1.thumb.webp",
+      "roleCount": 1,
+      "imageCount": 2,
+      "roles": [
         {
-          "src": "assets/images/Miku/Miku_1.jpeg",
-          "alt": "Miku 1"
-        },
-        {
-          "src": "assets/images/Miku/Miku_2.jpeg",
-          "alt": "Miku 2"
+          "id": "miku-miku",
+          "workId": "miku",
+          "title": "Miku",
+          "coverThumb": "assets/images/Miku/Miku_1.thumb.webp",
+          "imageCount": 2,
+          "images": [
+            {
+              "src": "assets/images/Miku/Miku_1.jpeg",
+              "alt": "Miku Miku 1"
+            },
+            {
+              "src": "assets/images/Miku/Miku_2.jpeg",
+              "alt": "Miku Miku 2"
+            }
+          ]
         }
       ]
     },
     {
-      "id": "pripara-aone",
+      "id": "pripara",
       "category": "photography",
-      "title": "PriPara · Aone",
-      "cover": "assets/images/PriPara/Aone/Aone_1.jpeg",
-      "images": [
+      "title": "PriPara",
+      "coverThumb": "assets/images/PriPara/Aone/Aone_1.thumb.webp",
+      "roleCount": 6,
+      "imageCount": 14,
+      "roles": [
         {
-          "src": "assets/images/PriPara/Aone/Aone_1.jpeg",
-          "alt": "PriPara · Aone 1"
+          "id": "pripara-aone",
+          "workId": "pripara",
+          "title": "Aone",
+          "coverThumb": "assets/images/PriPara/Aone/Aone_1.thumb.webp",
+          "imageCount": 2,
+          "images": [
+            {
+              "src": "assets/images/PriPara/Aone/Aone_1.jpeg",
+              "alt": "PriPara Aone 1"
+            },
+            {
+              "src": "assets/images/PriPara/Aone/Aone_2.jpeg",
+              "alt": "PriPara Aone 2"
+            }
+          ]
         },
         {
-          "src": "assets/images/PriPara/Aone/Aone_2.jpeg",
-          "alt": "PriPara · Aone 2"
-        }
-      ]
-    },
-    {
-      "id": "pripara-groupphoto",
-      "category": "photography",
-      "title": "PriPara · GroupPhoto",
-      "cover": "assets/images/PriPara/GroupPhoto/GroupPhoto_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/PriPara/GroupPhoto/GroupPhoto_1.jpeg",
-          "alt": "PriPara · GroupPhoto 1"
+          "id": "pripara-groupphoto",
+          "workId": "pripara",
+          "title": "GroupPhoto",
+          "coverThumb": "assets/images/PriPara/GroupPhoto/GroupPhoto_1.thumb.webp",
+          "imageCount": 2,
+          "images": [
+            {
+              "src": "assets/images/PriPara/GroupPhoto/GroupPhoto_1.jpeg",
+              "alt": "PriPara GroupPhoto 1"
+            },
+            {
+              "src": "assets/images/PriPara/GroupPhoto/GroupPhoto_2.jpeg",
+              "alt": "PriPara GroupPhoto 2"
+            }
+          ]
         },
         {
-          "src": "assets/images/PriPara/GroupPhoto/GroupPhoto_2.jpeg",
-          "alt": "PriPara · GroupPhoto 2"
-        }
-      ]
-    },
-    {
-      "id": "pripara-kanon",
-      "category": "photography",
-      "title": "PriPara · Kanon",
-      "cover": "assets/images/PriPara/Kanon/Kanon_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/PriPara/Kanon/Kanon_1.jpeg",
-          "alt": "PriPara · Kanon 1"
-        }
-      ]
-    },
-    {
-      "id": "pripara-lala",
-      "category": "photography",
-      "title": "PriPara · Lala",
-      "cover": "assets/images/PriPara/Lala/Lala_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/PriPara/Lala/Lala_1.jpeg",
-          "alt": "PriPara · Lala 1"
+          "id": "pripara-kanon",
+          "workId": "pripara",
+          "title": "Kanon",
+          "coverThumb": "assets/images/PriPara/Kanon/Kanon_1.thumb.webp",
+          "imageCount": 1,
+          "images": [
+            {
+              "src": "assets/images/PriPara/Kanon/Kanon_1.jpeg",
+              "alt": "PriPara Kanon 1"
+            }
+          ]
         },
         {
-          "src": "assets/images/PriPara/Lala/Lala_2.jpeg",
-          "alt": "PriPara · Lala 2"
+          "id": "pripara-lala",
+          "workId": "pripara",
+          "title": "Lala",
+          "coverThumb": "assets/images/PriPara/Lala/Lala_1.thumb.webp",
+          "imageCount": 6,
+          "images": [
+            {
+              "src": "assets/images/PriPara/Lala/Lala_1.jpeg",
+              "alt": "PriPara Lala 1"
+            },
+            {
+              "src": "assets/images/PriPara/Lala/Lala_2.jpeg",
+              "alt": "PriPara Lala 2"
+            },
+            {
+              "src": "assets/images/PriPara/Lala/Lala_3.jpeg",
+              "alt": "PriPara Lala 3"
+            },
+            {
+              "src": "assets/images/PriPara/Lala/Lala_4.jpeg",
+              "alt": "PriPara Lala 4"
+            },
+            {
+              "src": "assets/images/PriPara/Lala/Lala_5.jpeg",
+              "alt": "PriPara Lala 5"
+            },
+            {
+              "src": "assets/images/PriPara/Lala/Lala_6.jpeg",
+              "alt": "PriPara Lala 6"
+            }
+          ]
         },
         {
-          "src": "assets/images/PriPara/Lala/Lala_3.jpeg",
-          "alt": "PriPara · Lala 3"
+          "id": "pripara-pione",
+          "workId": "pripara",
+          "title": "Pione",
+          "coverThumb": "assets/images/PriPara/Pione/Pione_1.thumb.webp",
+          "imageCount": 2,
+          "images": [
+            {
+              "src": "assets/images/PriPara/Pione/Pione_1.jpeg",
+              "alt": "PriPara Pione 1"
+            },
+            {
+              "src": "assets/images/PriPara/Pione/Pione_2.jpeg",
+              "alt": "PriPara Pione 2"
+            }
+          ]
         },
         {
-          "src": "assets/images/PriPara/Lala/Lala_4.jpeg",
-          "alt": "PriPara · Lala 4"
-        },
-        {
-          "src": "assets/images/PriPara/Lala/Lala_5.jpeg",
-          "alt": "PriPara · Lala 5"
-        },
-        {
-          "src": "assets/images/PriPara/Lala/Lala_6.jpeg",
-          "alt": "PriPara · Lala 6"
-        }
-      ]
-    },
-    {
-      "id": "pripara-pione",
-      "category": "photography",
-      "title": "PriPara · Pione",
-      "cover": "assets/images/PriPara/Pione/Pione_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/PriPara/Pione/Pione_1.jpeg",
-          "alt": "PriPara · Pione 1"
-        },
-        {
-          "src": "assets/images/PriPara/Pione/Pione_2.jpeg",
-          "alt": "PriPara · Pione 2"
-        }
-      ]
-    },
-    {
-      "id": "pripara-tricolore",
-      "category": "photography",
-      "title": "PriPara · Tricolore",
-      "cover": "assets/images/PriPara/Tricolore/Tricolore_1.jpeg",
-      "images": [
-        {
-          "src": "assets/images/PriPara/Tricolore/Tricolore_1.jpeg",
-          "alt": "PriPara · Tricolore 1"
+          "id": "pripara-tricolore",
+          "workId": "pripara",
+          "title": "Tricolore",
+          "coverThumb": "assets/images/PriPara/Tricolore/Tricolore_1.thumb.webp",
+          "imageCount": 1,
+          "images": [
+            {
+              "src": "assets/images/PriPara/Tricolore/Tricolore_1.jpeg",
+              "alt": "PriPara Tricolore 1"
+            }
+          ]
         }
       ]
     }

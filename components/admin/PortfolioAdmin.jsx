@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const INITIAL_SNAPSHOT = {
   works: [],
@@ -17,11 +18,10 @@ const VISIBILITY_ENDPOINTS = {
 };
 
 export default function PortfolioAdmin() {
-  const [token, setToken] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("等待管理员登录。");
+  const [statusMessage, setStatusMessage] = useState("正在验证管理员会话...");
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadStatus, setUploadStatus] = useState("尚未选择图片。");
   const [snapshot, setSnapshot] = useState(INITIAL_SNAPSHOT);
@@ -50,7 +50,9 @@ export default function PortfolioAdmin() {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(data?.error || `请求失败：${response.status}`);
+      const error = new Error(data?.error || `请求失败：${response.status}`);
+      error.status = response.status;
+      throw error;
     }
 
     return data;
@@ -64,6 +66,11 @@ export default function PortfolioAdmin() {
     try {
       await action();
     } catch (error) {
+      if (error?.status === 401) {
+        redirectToLogin();
+        return;
+      }
+
       setErrorMessage(error instanceof Error ? error.message : "操作失败。");
     } finally {
       setIsBusy(false);
@@ -82,15 +89,42 @@ export default function PortfolioAdmin() {
     return data;
   }
 
-  async function login() {
-    await runAction("正在登录管理员后台...", async () => {
-      await requestJson("/api/admin/session", {
-        method: "POST",
-        body: { token, password }
-      });
-      setIsLoggedIn(true);
+  useEffect(() => {
+    loadInitialPortfolio();
+  }, []);
+
+  function redirectToLogin() {
+    setIsLoggedIn(false);
+    router.replace("/admin/portfolio");
+  }
+
+  async function loadInitialPortfolio() {
+    setIsBusy(true);
+    setErrorMessage("");
+    setStatusMessage("正在验证管理员会话...");
+
+    try {
       await fetchPortfolioSnapshot();
-      setStatusMessage("登录成功，作品集 snapshot 已加载。");
+      setIsLoggedIn(true);
+      setStatusMessage("登录有效，作品集 snapshot 已加载。");
+    } catch (error) {
+      if (error?.status === 401) {
+        redirectToLogin();
+        return;
+      }
+
+      setErrorMessage(error instanceof Error ? error.message : "作品集 snapshot 加载失败。");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function logout() {
+    await runAction("正在退出登录...", async () => {
+      await requestJson("/api/admin/session", {
+        method: "DELETE"
+      });
+      router.replace("/admin/portfolio");
     });
   }
 
@@ -251,17 +285,10 @@ export default function PortfolioAdmin() {
       {errorMessage ? <p className="form-error" role="alert">错误消息：{errorMessage}</p> : null}
 
       <div className="admin-card">
-        <h2>管理员登录</h2>
-        <label>
-          隐藏 Token
-          <input value={token} onChange={(event) => setToken(event.target.value)} placeholder="URL token" />
-        </label>
-        <label>
-          管理密码
-          <input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Admin password" type="password" />
-        </label>
-        <button className="button" type="button" disabled={isBusy} onClick={login}>
-          登录
+        <h2>会话</h2>
+        <p className="form-hint">当前页面仅在管理员会话有效时加载作品集管理数据。</p>
+        <button className="button" type="button" disabled={isBusy} onClick={logout}>
+          退出登录
         </button>
         <button className="button secondary" type="button" disabled={isBusy} onClick={loadPortfolio}>
           刷新 snapshot

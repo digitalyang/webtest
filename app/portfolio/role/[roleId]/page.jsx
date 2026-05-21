@@ -2,6 +2,10 @@ import Link from "next/link";
 import manifest from "../../../../public/assets/data/portfolio.json";
 import RoleImageLoader from "../../../../components/portfolio/RoleImageLoader";
 import { findRoleById, getWorkHref, withoutThumbnails } from "../../../../lib/portfolio";
+import { getRequestContext } from "../../../../lib/server/cloudflare";
+import { getMergedPortfolioData } from "../../../../lib/server/portfolio-admin";
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return manifest.photographyWorks.flatMap((work) =>
@@ -22,7 +26,8 @@ export async function generateMetadata({ params }) {
 
 export default async function PortfolioRolePage({ params }) {
   const { roleId } = await params;
-  const result = findRoleById(manifest, roleId);
+  const portfolio = await getPublicPortfolioData();
+  const result = findRoleById(portfolio, roleId);
 
   if (!result) {
     return (
@@ -68,4 +73,17 @@ export default async function PortfolioRolePage({ params }) {
       </footer>
     </>
   );
+}
+
+async function getPublicPortfolioData() {
+  const env = getOptionalRequestEnv();
+  return getMergedPortfolioData(env, manifest);
+}
+
+function getOptionalRequestEnv() {
+  try {
+    return getRequestContext().env;
+  } catch {
+    return undefined;
+  }
 }

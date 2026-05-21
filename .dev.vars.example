@@ -1,1 +1,4 @@
-ADMIN_TOKEN=change-this-before-uploading-images
+ADMIN_TOKEN=replace-with-private-admin-url-token
+ADMIN_PASSWORD_HASH=replace-with-hash-from-local-helper
+CLOUDINARY_CLOUD_NAME=replace-with-cloudinary-cloud-name
+CLOUDINARY_UPLOAD_PRESET=replace-with-unsigned-upload-preset

@@ -1,12 +1,18 @@
 import Link from "next/link";
 import manifest from "../../public/assets/data/portfolio.json";
 import PortfolioTabs from "../../components/portfolio/PortfolioTabs";
+import { getRequestContext } from "../../lib/server/cloudflare";
+import { getMergedPortfolioData } from "../../lib/server/portfolio-admin";
 
 export const metadata = {
   title: "作品集 - 个人主页"
 };
 
-export default function PortfolioPage() {
+export const dynamic = "force-dynamic";
+
+export default async function PortfolioPage() {
+  const portfolio = await getPublicPortfolioData();
+
   return (
     <>
       <section className="hero">
@@ -15,7 +21,7 @@ export default function PortfolioPage() {
         <p className="subtitle">摄影、代码项目与手绘作品。</p>
       </section>
 
-      <PortfolioTabs categories={manifest.categories} photographyWorks={manifest.photographyWorks} projects={manifest.projects} />
+      <PortfolioTabs categories={portfolio.categories} photographyWorks={portfolio.photographyWorks} projects={portfolio.projects} />
 
       <footer>
         <p>
@@ -24,4 +30,17 @@ export default function PortfolioPage() {
       </footer>
     </>
   );
+}
+
+async function getPublicPortfolioData() {
+  const env = getOptionalRequestEnv();
+  return getMergedPortfolioData(env, manifest);
+}
+
+function getOptionalRequestEnv() {
+  try {
+    return getRequestContext().env;
+  } catch {
+    return undefined;
+  }
 }

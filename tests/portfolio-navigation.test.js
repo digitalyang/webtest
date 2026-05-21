@@ -19,6 +19,12 @@ describe("portfolio navigation", () => {
     );
   });
 
+  test("keeps Cloudinary absolute image URLs unchanged", () => {
+    expect(resolveImageSrc("https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/nina.png")).toBe(
+      "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/nina.png"
+    );
+  });
+
   test("creates work detail links", () => {
     expect(getWorkHref("hok")).toBe("/portfolio/work/hok");
   });

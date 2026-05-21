@@ -395,6 +395,53 @@ describe("portfolio admin API request validation", () => {
     expect(body.error).toContain("conflicts with an existing static work");
   });
 
+  test("creates roles under static works", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ id: 1, static_work_id: "girlsbandcry", title: "Subaru", slug: "subaru" }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/roles/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        title: "Subaru",
+        slug: "subaru"
+      })
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(body.slug).toBe("subaru");
+    expect(env.calls[0].sql).toContain("INSERT INTO portfolio_static_roles");
+    expect(env.calls[0].values).toEqual(["girlsbandcry", "Subaru", "subaru"]);
+  });
+
+  test("sets static portfolio cover overrides", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ success: true }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/covers/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/covers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static-role",
+        targetId: "girlsbandcry-nina",
+        imageId: 50
+      })
+    }));
+
+    expect(response.status).toBe(200);
+    expect(env.calls[0].sql).toContain("portfolio_static_cover_overrides");
+    expect(env.calls[0].values).toEqual(["role", "girlsbandcry-nina", 50]);
+  });
+
   test("rejects image metadata without a valid admin session", async () => {
     const env = createEnv();
     const request = new Request("https://example.com/api/admin/portfolio/images", {
@@ -606,6 +653,37 @@ describe("portfolio admin API request validation", () => {
     });
   });
 
+  test("reserves upload plans for static D1 roles", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      { static_work_id: "girlsbandcry", slug: "subaru", title: "Subaru" },
+      { max_order: 0 }
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleImageUploadPlanRequest(new Request("https://example.com/api/admin/portfolio/images/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        staticRoleId: "girlsbandcry-subaru",
+        files: [{ name: "A.png", type: "image/png" }]
+      })
+    }), env, createStaticManifest());
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.plan[0]).toMatchObject({
+      index: 1,
+      filename: "subaru_1.png",
+      publicId: "webtest/portfolio/girlsbandcry/subaru/subaru_1"
+    });
+    expect(env.calls[0].sql).toContain("portfolio_static_roles");
+    expect(env.calls[0].values).toEqual(["girlsbandcry", "subaru"]);
+  });
+
   test("saves static appended image metadata", async () => {
     const hash = await hashAdminPassword("secret");
     const env = createEnv([{ success: true }]);
@@ -632,6 +710,38 @@ describe("portfolio admin API request validation", () => {
 
     expect(response.status).toBe(201);
     expect(env.calls.some((call) => call.sql?.includes("INSERT INTO portfolio_static_images"))).toBe(true);
+  });
+
+  test("saves static appended image metadata for static D1 roles", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      { static_work_id: "girlsbandcry", slug: "subaru", title: "Subaru" }
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleCreateImagesRequest(new Request("https://example.com/api/admin/portfolio/images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        staticRoleId: "girlsbandcry-subaru",
+        images: [{
+          publicId: "webtest/portfolio/girlsbandcry/subaru/subaru_1",
+          secureUrl: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/subaru/subaru_1.png",
+          coverThumbUrl: "",
+          filename: "subaru_1.png",
+          alt: "Subaru 1",
+          sortOrder: 1
+        }]
+      })
+    }), env, createStaticManifest());
+    const insertCall = env.calls.find((call) => call.sql?.includes("INSERT INTO portfolio_static_images"));
+
+    expect(response.status).toBe(201);
+    expect(insertCall.values[0]).toBe("girlsbandcry");
+    expect(insertCall.values[1]).toBe("girlsbandcry-subaru");
   });
 
   test("rejects missing static portfolio roles", async () => {

@@ -70,6 +70,25 @@ function createEnv(responses = [], { batch = true } = {}) {
   };
 }
 
+function createStaticManifest(imageCount = 4) {
+  return {
+    photographyWorks: [
+      {
+        id: "girlsbandcry",
+        roles: [
+          {
+            id: "girlsbandcry-nina",
+            images: Array.from({ length: imageCount }, (_, index) => ({
+              src: `assets/images/GirlsBandCry/Nina/Nina_${index + 1}.jpeg`,
+              alt: `GirlsBandCry Nina ${index + 1}`
+            }))
+          }
+        ]
+      }
+    ]
+  };
+}
+
 describe("portfolio admin D1 helpers", () => {
   test("creates a work after rejecting invalid slugs", async () => {
     const env = createEnv([{ id: 1, title: "GirlsBandCry", slug: "girlsbandcry" }]);
@@ -538,7 +557,7 @@ describe("portfolio admin API request validation", () => {
         staticImageCount: 4,
         files: [{ name: "A.png", type: "image/png" }]
       })
-    }), env);
+    }), env, createStaticManifest());
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -571,10 +590,60 @@ describe("portfolio admin API request validation", () => {
           sortOrder: 5
         }]
       })
-    }), env);
+    }), env, createStaticManifest());
 
     expect(response.status).toBe(201);
     expect(env.calls.some((call) => call.sql?.includes("INSERT INTO portfolio_static_images"))).toBe(true);
+  });
+
+  test("rejects missing static portfolio roles", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleCreateImagesRequest(new Request("https://example.com/api/admin/portfolio/images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        staticRoleId: "girlsbandcry-missing",
+        images: []
+      })
+    }), env, createStaticManifest());
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("静态作品或角色不存在。");
+    expect(env.calls.some((call) => call.sql?.includes("INSERT INTO portfolio_static_images"))).toBe(false);
+  });
+
+  test("ignores invalid static portfolio image counts", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ max_order: 0 }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleImageUploadPlanRequest(new Request("https://example.com/api/admin/portfolio/images/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        staticRoleId: "girlsbandcry-nina",
+        staticImageCount: "bad",
+        files: [{ name: "A.png", type: "image/png" }]
+      })
+    }), env, createStaticManifest());
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.plan[0]).toMatchObject({
+      index: 5,
+      filename: "nina_5.png",
+      publicId: "webtest/portfolio/girlsbandcry/nina/nina_5"
+    });
   });
 
   test("reserves upload plans for valid admin sessions", async () => {

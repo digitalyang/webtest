@@ -415,6 +415,8 @@ describe("portfolio admin helper functions", () => {
 
     expect(options.works.map((work) => work.label)).toEqual(["GirlsBandCry", "Original"]);
     expect(options.rolesByWork["static:girlsbandcry"].map((role) => role.label)).toEqual(["Nina", "Subaru"]);
+    expect(options.rolesByWork["static:girlsbandcry"][1].source).toBe("static-dynamic");
+    expect(options.rolesByWork["static:girlsbandcry"][1].workSource).toBe("static");
     expect(options.rolesByWork["dynamic:1"].map((role) => role.label)).toEqual(["Nina"]);
   });
 });

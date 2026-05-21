@@ -87,6 +87,20 @@ describe("image compression helpers", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  test("throws a clear error when the browser cannot read the image", async () => {
+    const original = makeFile("broken.png", COMPRESSION_TARGET_BYTES + 1);
+
+    globalThis.createImageBitmap = vi.fn(async () => {
+      throw new Error("The source image could not be decoded.");
+    });
+    globalThis.document = {
+      createElement: vi.fn()
+    };
+
+    await expect(prepareImageForUpload(original)).rejects.toThrow("当前浏览器无法读取 broken.png");
+    await expect(prepareImageForUpload(original)).rejects.toThrow("请先手动压缩图片到 9.5MB 以下");
+  });
+
   test("throws a clear error when compression cannot reach the target size", async () => {
     const original = makeFile("too-large.png", COMPRESSION_TARGET_BYTES + 1);
     const stillLarge = makeFile("too-large.webp", COMPRESSION_TARGET_BYTES + 1, "image/webp");

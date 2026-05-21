@@ -49,7 +49,8 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("角色标题");
     expect(html).toContain("角色 slug");
     expect(html).toContain("作品 ID");
-    expect(html).toContain("角色 ID");
+    expect(html).toContain("选择作品");
+    expect(html).toContain("选择相册");
     expect(html).toContain("目标类型");
     expect(html).toContain("图片 ID");
     expect(html).toContain("上传状态");
@@ -62,6 +63,7 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("图片 snapshot");
     expect(uploadSection).not.toContain("作品 slug");
     expect(uploadSection).not.toContain("角色 slug");
+    expect(html).not.toContain("角色 ID");
     expect(html).not.toContain("隐藏 Token");
     expect(html).not.toContain("接口接入中");
   });

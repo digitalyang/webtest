@@ -5,6 +5,7 @@ import {
   createPortfolioRole,
   getDynamicPortfolioRows,
   getNextImageIndex,
+  handleAdminPortfolioRequest,
   handleCreateImagesRequest,
   handleImageUploadPlanRequest,
   savePortfolioImages,
@@ -198,6 +199,43 @@ describe("portfolio admin D1 helpers", () => {
     expect(env.calls.some((call) =>
       call.sql.includes("WHERE is_hidden = 0") && call.sql.includes("ORDER BY sort_order, id")
     )).toBe(true);
+  });
+
+  test("returns admin upload target options in the portfolio snapshot", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      { results: [{ id: 10, title: "Dynamic Work", slug: "dynamic-work" }] },
+      { results: [{ id: 20, work_id: 10, title: "Dynamic Role", slug: "dynamic-role" }] },
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [] }
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    const cookie = await createAdminSessionCookie(env);
+
+    const response = await handleAdminPortfolioRequest(new Request("https://example.com/api/admin/portfolio", {
+      headers: { Cookie: cookie }
+    }), env, createStaticManifest());
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.adminOptions.works.map((work) => work.value)).toEqual([
+      "static:girlsbandcry",
+      "dynamic:10"
+    ]);
+    expect(body.adminOptions.rolesByWork["static:girlsbandcry"][0]).toMatchObject({
+      source: "static",
+      workSource: "static",
+      workId: "girlsbandcry",
+      id: "girlsbandcry-nina"
+    });
+    expect(body.adminOptions.rolesByWork["dynamic:10"][0]).toMatchObject({
+      source: "dynamic",
+      workSource: "dynamic",
+      workId: 10,
+      id: 20
+    });
   });
 });
 

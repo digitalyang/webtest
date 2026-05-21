@@ -12,6 +12,10 @@ const INITIAL_SNAPSHOT = {
   works: [],
   roles: [],
   images: [],
+  adminOptions: { works: [], rolesByWork: {} },
+  staticImages: [],
+  staticRoles: [],
+  staticCoverOverrides: [],
   cloudName: "",
   uploadPreset: ""
 };
@@ -37,8 +41,8 @@ export default function PortfolioAdmin() {
   const [roleWorkId, setRoleWorkId] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
   const [roleSlug, setRoleSlug] = useState("");
-  const [uploadWorkId, setUploadWorkId] = useState("");
-  const [uploadRoleId, setUploadRoleId] = useState("");
+  const [selectedWorkKey, setSelectedWorkKey] = useState("");
+  const [selectedRoleKey, setSelectedRoleKey] = useState("");
   const [uploadFiles, setUploadFiles] = useState([]);
   const [coverTargetType, setCoverTargetType] = useState("role");
   const [coverTargetId, setCoverTargetId] = useState("");
@@ -46,6 +50,9 @@ export default function PortfolioAdmin() {
   const [visibilityTargetType, setVisibilityTargetType] = useState("image");
   const [visibilityTargetId, setVisibilityTargetId] = useState("");
   const [visibilityHidden, setVisibilityHidden] = useState(true);
+  const workOptions = snapshot.adminOptions?.works || [];
+  const roleOptions = selectedWorkKey ? snapshot.adminOptions?.rolesByWork?.[selectedWorkKey] || [] : [];
+  const selectedRole = roleOptions.find((role) => role.value === selectedRoleKey);
 
   async function requestJson(url, { method = "GET", body } = {}) {
     const response = await fetch(url, {
@@ -90,6 +97,10 @@ export default function PortfolioAdmin() {
       works: Array.isArray(data.works) ? data.works : [],
       roles: Array.isArray(data.roles) ? data.roles : [],
       images: Array.isArray(data.images) ? data.images : [],
+      adminOptions: data.adminOptions || { works: [], rolesByWork: {} },
+      staticImages: Array.isArray(data.staticImages) ? data.staticImages : [],
+      staticRoles: Array.isArray(data.staticRoles) ? data.staticRoles : [],
+      staticCoverOverrides: Array.isArray(data.staticCoverOverrides) ? data.staticCoverOverrides : [],
       cloudName: data.cloudName || "",
       uploadPreset: data.uploadPreset || ""
     });
@@ -173,8 +184,11 @@ export default function PortfolioAdmin() {
     const data = await requestJson("/api/admin/portfolio/images/plan", {
       method: "POST",
       body: {
-        workId: uploadWorkId,
-        roleId: uploadRoleId,
+        targetType: selectedRole?.source === "dynamic" ? "dynamic" : "static",
+        workId: selectedRole?.workSource === "dynamic" ? selectedRole.workId : undefined,
+        roleId: selectedRole?.source === "dynamic" ? selectedRole.id : undefined,
+        staticWorkId: selectedRole?.workSource === "static" ? selectedRole.workId : undefined,
+        staticRoleId: selectedRole?.workSource === "static" ? selectedRole.id : undefined,
         files: files.map((file) => ({ name: file.name, type: file.type }))
       }
     });
@@ -209,8 +223,11 @@ export default function PortfolioAdmin() {
     await requestJson("/api/admin/portfolio/images", {
       method: "POST",
       body: {
-        workId: uploadWorkId,
-        roleId: uploadRoleId,
+        targetType: selectedRole?.source === "dynamic" ? "dynamic" : "static",
+        workId: selectedRole?.workSource === "dynamic" ? selectedRole.workId : undefined,
+        roleId: selectedRole?.source === "dynamic" ? selectedRole.id : undefined,
+        staticWorkId: selectedRole?.workSource === "static" ? selectedRole.workId : undefined,
+        staticRoleId: selectedRole?.workSource === "static" ? selectedRole.id : undefined,
         images
       }
     });
@@ -249,6 +266,9 @@ export default function PortfolioAdmin() {
       const files = Array.from(uploadFiles);
       if (files.length === 0) {
         throw new Error("请选择至少一张作品图片。");
+      }
+      if (!selectedRole) {
+        throw new Error("请选择作品和相册。");
       }
 
       setUploadProgress(calculateUploadProgress("plan", 0, files.length));
@@ -368,12 +388,25 @@ export default function PortfolioAdmin() {
         <div className="admin-card">
           <h2>上传图片</h2>
           <label>
-            作品 ID
-            <input value={uploadWorkId} onChange={(event) => setUploadWorkId(event.target.value)} placeholder="1" />
+            选择作品
+            <select value={selectedWorkKey} onChange={(event) => {
+              setSelectedWorkKey(event.target.value);
+              setSelectedRoleKey("");
+            }}>
+              <option value="">请选择作品</option>
+              {workOptions.map((work) => (
+                <option key={work.value} value={work.value}>{work.label}</option>
+              ))}
+            </select>
           </label>
           <label>
-            角色 ID
-            <input value={uploadRoleId} onChange={(event) => setUploadRoleId(event.target.value)} placeholder="1" />
+            选择相册
+            <select value={selectedRoleKey} onChange={(event) => setSelectedRoleKey(event.target.value)} disabled={!selectedWorkKey}>
+              <option value="">请选择相册</option>
+              {roleOptions.map((role) => (
+                <option key={role.value} value={role.value}>{role.label}</option>
+              ))}
+            </select>
           </label>
           <label>
             选择作品图片
@@ -384,7 +417,7 @@ export default function PortfolioAdmin() {
               onChange={(event) => resetUploadProgress(Array.from(event.target.files || []))}
             />
           </label>
-          <p className="form-hint">上传计划会根据作品 ID / 角色 ID 在服务端查 slug 并自动命名。</p>
+          <p className="form-hint">上传计划会根据选择的作品和相册在服务端查 slug 并自动命名。</p>
           <div className="upload-progress" aria-label="上传进度">
             <div className="upload-progress-header">
               <span>上传进度</span>

@@ -325,6 +325,36 @@ describe("portfolio admin helper functions", () => {
     });
   });
 
+  test("skips static-work roles that duplicate manifest role ids", () => {
+    const result = applyStaticPortfolioExtensions({
+      photographyWorks: [
+        {
+          id: "girlsbandcry",
+          title: "GirlsBandCry",
+          roles: [
+            {
+              id: "girlsbandcry-nina",
+              workId: "girlsbandcry",
+              title: "Nina",
+              imageCount: 0,
+              images: []
+            }
+          ]
+        }
+      ]
+    }, {
+      staticRoles: [
+        {
+          static_work_id: "girlsbandcry",
+          slug: "nina",
+          title: "Duplicate"
+        }
+      ]
+    });
+
+    expect(result.photographyWorks[0].roles.filter((role) => role.id === "girlsbandcry-nina")).toHaveLength(1);
+  });
+
   test("merges static appended images and static-work roles into public portfolio data", () => {
     const result = applyStaticPortfolioExtensions({
       photographyWorks: [
@@ -410,13 +440,17 @@ describe("portfolio admin helper functions", () => {
         works: [{ id: 1, title: "Original", slug: "original" }],
         roles: [{ id: 2, work_id: 1, title: "Nina", slug: "nina" }]
       },
-      staticRoles: [{ id: 3, static_work_id: "girlsbandcry", title: "Subaru", slug: "subaru" }]
+      staticRoles: [
+        { id: 3, static_work_id: "girlsbandcry", title: "Subaru", slug: "subaru" },
+        { id: 4, static_work_id: "girlsbandcry", title: "Duplicate", slug: "nina" }
+      ]
     });
 
     expect(options.works.map((work) => work.label)).toEqual(["GirlsBandCry", "Original"]);
     expect(options.rolesByWork["static:girlsbandcry"].map((role) => role.label)).toEqual(["Nina", "Subaru"]);
     expect(options.rolesByWork["static:girlsbandcry"][1].source).toBe("static-dynamic");
     expect(options.rolesByWork["static:girlsbandcry"][1].workSource).toBe("static");
+    expect(options.rolesByWork["static:girlsbandcry"].map((role) => role.title)).not.toContain("Duplicate");
     expect(options.rolesByWork["dynamic:1"].map((role) => role.label)).toEqual(["Nina"]);
   });
 });

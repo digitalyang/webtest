@@ -619,6 +619,28 @@ describe("portfolio admin API request validation", () => {
     expect(env.calls.some((call) => call.sql?.includes("INSERT INTO portfolio_static_images"))).toBe(false);
   });
 
+  test("rejects missing static portfolio works", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleImageUploadPlanRequest(new Request("https://example.com/api/admin/portfolio/images/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "missing-work",
+        staticRoleId: "missing-work-nina",
+        files: [{ name: "A.png", type: "image/png" }]
+      })
+    }), env, createStaticManifest());
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("静态作品或角色不存在。");
+  });
+
   test("ignores invalid static portfolio image counts", async () => {
     const hash = await hashAdminPassword("secret");
     const env = createEnv([{ max_order: 0 }]);

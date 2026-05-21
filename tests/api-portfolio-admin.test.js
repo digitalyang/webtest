@@ -522,6 +522,61 @@ describe("portfolio admin API request validation", () => {
     expect(env.calls.some((call) => call.sql?.includes("INSERT INTO portfolio_images"))).toBe(false);
   });
 
+  test("reserves upload plans for static portfolio roles", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ max_order: 0 }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleImageUploadPlanRequest(new Request("https://example.com/api/admin/portfolio/images/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        staticRoleId: "girlsbandcry-nina",
+        staticImageCount: 4,
+        files: [{ name: "A.png", type: "image/png" }]
+      })
+    }), env);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.plan[0]).toMatchObject({
+      index: 5,
+      filename: "nina_5.png",
+      publicId: "webtest/portfolio/girlsbandcry/nina/nina_5"
+    });
+  });
+
+  test("saves static appended image metadata", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ success: true }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleCreateImagesRequest(new Request("https://example.com/api/admin/portfolio/images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        staticRoleId: "girlsbandcry-nina",
+        images: [{
+          publicId: "webtest/portfolio/girlsbandcry/nina/nina_5",
+          secureUrl: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_5.png",
+          coverThumbUrl: "",
+          filename: "nina_5.png",
+          alt: "Nina 5",
+          sortOrder: 5
+        }]
+      })
+    }), env);
+
+    expect(response.status).toBe(201);
+    expect(env.calls.some((call) => call.sql?.includes("INSERT INTO portfolio_static_images"))).toBe(true);
+  });
+
   test("reserves upload plans for valid admin sessions", async () => {
     const hash = await hashAdminPassword("secret");
     const env = createEnv([{ work_slug: "girlsbandcry", role_slug: "nina" }, { max_order: 4 }]);

@@ -186,11 +186,10 @@ describe("admin auth helpers", () => {
   test("hashes and verifies admin password without exposing the raw password", async () => {
     const hash = await hashAdminPassword("secret");
     expect(hash).not.toBe("secret");
-    expect(await verifyAdminLogin({ token: "abc", password: "secret" }, { ADMIN_TOKEN: "abc", ADMIN_PASSWORD_HASH: hash })).toBe(true);
-    expect(await verifyAdminLogin({ token: "bad", password: "secret" }, { ADMIN_TOKEN: "abc", ADMIN_PASSWORD_HASH: hash })).toBe(false);
-    expect(await verifyAdminLogin({ token: "abc", password: "wrong" }, { ADMIN_TOKEN: "abc", ADMIN_PASSWORD_HASH: hash })).toBe(false);
-    expect(await verifyAdminLogin({ token: "abc", password: "secret" }, { ADMIN_PASSWORD_HASH: hash })).toBe(false);
-    expect(await verifyAdminLogin({ token: "abc", password: "secret" }, { ADMIN_TOKEN: "abc" })).toBe(false);
+    expect(await verifyAdminLogin({ password: "secret" }, { ADMIN_PASSWORD_HASH: hash })).toBe(true);
+    expect(await verifyAdminLogin({ password: "wrong" }, { ADMIN_PASSWORD_HASH: hash })).toBe(false);
+    expect(await verifyAdminLogin({ password: "secret" }, {})).toBe(false);
+    expect(await verifyAdminLogin({ token: "legacy-token", password: "secret" }, { ADMIN_PASSWORD_HASH: hash })).toBe(true);
   });
 
   test("creates and validates short-lived session cookies", async () => {
@@ -263,13 +262,12 @@ describe("admin session API", () => {
 
   test("disables caching for failed login responses", async () => {
     sessionRouteContext.env = {
-      ADMIN_TOKEN: "abc",
       ADMIN_PASSWORD_HASH: await hashAdminPassword("secret")
     };
     const { POST } = await import("../app/api/admin/session/route.js");
     const response = await POST(new Request("https://example.com/api/admin/session", {
       method: "POST",
-      body: JSON.stringify({ token: "bad", password: "secret" })
+      body: JSON.stringify({ password: "wrong" })
     }));
 
     expect(response.status).toBe(401);
@@ -278,14 +276,13 @@ describe("admin session API", () => {
 
   test("sets a secure no-store cookie for successful logins", async () => {
     sessionRouteContext.env = {
-      ADMIN_TOKEN: "abc",
       ADMIN_PASSWORD_HASH: await hashAdminPassword("secret")
     };
     const { POST } = await import("../app/api/admin/session/route.js");
     const response = await POST(new Request("https://example.com/api/admin/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: "abc", password: "secret" })
+      body: JSON.stringify({ password: "secret" })
     }));
 
     expect(response.status).toBe(200);

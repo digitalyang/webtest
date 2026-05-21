@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import {
   COMPRESSION_TARGET_BYTES,
@@ -18,6 +18,10 @@ function makeFile(name, size, type = "image/png") {
 }
 
 describe("image compression helpers", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   test("formats file sizes for upload messages", () => {
     expect(formatFileSize(512)).toBe("512B");
     expect(formatFileSize(2048)).toBe("2.0KB");
@@ -66,14 +70,14 @@ describe("image compression helpers", () => {
       }
     };
 
-    globalThis.createImageBitmap = vi.fn(async () => ({
+    vi.stubGlobal("createImageBitmap", vi.fn(async () => ({
       width: 2000,
       height: 1000,
       close
-    }));
-    globalThis.document = {
+    })));
+    vi.stubGlobal("document", {
       createElement: () => canvas
-    };
+    });
 
     const result = await prepareImageForUpload(original);
 
@@ -87,15 +91,38 @@ describe("image compression helpers", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  test("throws a clear error when webp encoding is unsupported", async () => {
+    const original = makeFile("fallback.png", COMPRESSION_TARGET_BYTES + 1);
+    const pngBlob = makeFile("fallback.png", COMPRESSION_TARGET_BYTES - 1024, "image/png");
+    const canvas = {
+      width: 0,
+      height: 0,
+      getContext: () => ({ drawImage: vi.fn() }),
+      toBlob: (callback) => callback(pngBlob)
+    };
+
+    vi.stubGlobal("createImageBitmap", vi.fn(async () => ({
+      width: 2000,
+      height: 1000,
+      close: vi.fn()
+    })));
+    vi.stubGlobal("document", {
+      createElement: () => canvas
+    });
+
+    await expect(prepareImageForUpload(original)).rejects.toThrow("当前浏览器不支持 WebP 自动压缩");
+    await expect(prepareImageForUpload(original)).rejects.toThrow("请先手动压缩图片到 9.5MB 以下");
+  });
+
   test("throws a clear error when the browser cannot read the image", async () => {
     const original = makeFile("broken.png", COMPRESSION_TARGET_BYTES + 1);
 
-    globalThis.createImageBitmap = vi.fn(async () => {
+    vi.stubGlobal("createImageBitmap", vi.fn(async () => {
       throw new Error("The source image could not be decoded.");
-    });
-    globalThis.document = {
+    }));
+    vi.stubGlobal("document", {
       createElement: vi.fn()
-    };
+    });
 
     await expect(prepareImageForUpload(original)).rejects.toThrow("当前浏览器无法读取 broken.png");
     await expect(prepareImageForUpload(original)).rejects.toThrow("请先手动压缩图片到 9.5MB 以下");
@@ -111,14 +138,14 @@ describe("image compression helpers", () => {
       toBlob: (callback) => callback(stillLarge)
     };
 
-    globalThis.createImageBitmap = vi.fn(async () => ({
+    vi.stubGlobal("createImageBitmap", vi.fn(async () => ({
       width: 2000,
       height: 1000,
       close: vi.fn()
-    }));
-    globalThis.document = {
+    })));
+    vi.stubGlobal("document", {
       createElement: () => canvas
-    };
+    });
 
     await expect(prepareImageForUpload(original)).rejects.toThrow("too-large.png 压缩后仍超过 9.5MB");
   });

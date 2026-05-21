@@ -420,9 +420,60 @@ describe("portfolio admin API request validation", () => {
     expect(env.calls[0].values).toEqual(["girlsbandcry", "Subaru", "subaru"]);
   });
 
+  test("rejects static roles under unknown static works", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/roles/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "unknown-work",
+        title: "Subaru",
+        slug: "subaru"
+      })
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("静态作品不存在。");
+    expect(env.calls).toEqual([]);
+  });
+
+  test("rejects static roles that collide with manifest roles", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/roles/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static",
+        staticWorkId: "girlsbandcry",
+        title: "Nina",
+        slug: "nina"
+      })
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("静态角色已存在。");
+    expect(env.calls).toEqual([]);
+  });
+
   test("sets static portfolio cover overrides", async () => {
     const hash = await hashAdminPassword("secret");
-    const env = createEnv([{ success: true }]);
+    const env = createEnv([
+      { id: 50, static_work_id: "girlsbandcry", static_role_id: "girlsbandcry-nina" },
+      { success: true }
+    ]);
     env.ADMIN_PASSWORD_HASH = hash;
     sessionRouteContext.env = env;
     const cookie = await createAdminSessionCookie(env);
@@ -438,8 +489,61 @@ describe("portfolio admin API request validation", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(env.calls[0].sql).toContain("portfolio_static_cover_overrides");
-    expect(env.calls[0].values).toEqual(["role", "girlsbandcry-nina", 50]);
+    expect(env.calls[0].sql).toContain("portfolio_static_images");
+    expect(env.calls[0].values).toEqual([50]);
+    expect(env.calls[1].sql).toContain("portfolio_static_cover_overrides");
+    expect(env.calls[1].values).toEqual(["role", "girlsbandcry-nina", 50]);
+  });
+
+  test("rejects static role covers when the image belongs to another role", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      { id: 50, static_work_id: "girlsbandcry", static_role_id: "girlsbandcry-subaru" }
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/covers/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/covers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static-role",
+        targetId: "girlsbandcry-nina",
+        imageId: 50
+      })
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("静态封面图片无效。");
+    expect(env.calls.some((call) => call.sql?.includes("portfolio_static_cover_overrides"))).toBe(false);
+  });
+
+  test("rejects static role covers for missing targets", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      { id: 50, static_work_id: "girlsbandcry", static_role_id: "girlsbandcry-missing" },
+      undefined
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/covers/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/covers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static-role",
+        targetId: "girlsbandcry-missing",
+        imageId: 50
+      })
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("静态封面目标无效。");
+    expect(env.calls.some((call) => call.sql?.includes("portfolio_static_cover_overrides"))).toBe(false);
   });
 
   test("rejects image metadata without a valid admin session", async () => {

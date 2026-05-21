@@ -267,7 +267,7 @@ export default function PortfolioAdmin() {
         const uploadedImage = await uploadToCloudinary(file, plannedImage.publicId);
         setUploadProgress(calculateUploadProgress("upload", index + 1, preparedFiles.length));
         images.push({
-          publicId: uploadedImage.public_id || plannedImage.publicId,
+          publicId: plannedImage.publicId,
           secureUrl: uploadedImage.secure_url,
           coverThumbUrl: "",
           filename: plannedImage.filename || file.name,

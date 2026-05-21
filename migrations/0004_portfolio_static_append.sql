@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS portfolio_static_cover_overrides (
   target_id TEXT NOT NULL,
   image_id INTEGER NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (image_id) REFERENCES portfolio_static_images(id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_portfolio_static_cover_overrides_target

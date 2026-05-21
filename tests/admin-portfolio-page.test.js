@@ -53,6 +53,9 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("目标类型");
     expect(html).toContain("图片 ID");
     expect(html).toContain("上传状态");
+    expect(html).toContain("上传进度");
+    expect(html).toContain("0%");
+    expect(html).toContain("压缩详情");
     expect(html).toContain("选择作品图片");
     expect(html).toContain("作品 snapshot");
     expect(html).toContain("角色 snapshot");

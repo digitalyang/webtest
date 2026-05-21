@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  calculateUploadProgress,
+  fileNeedsCompression,
+  prepareImageForUpload
+} from "../../lib/client/image-compression";
 
 const INITIAL_SNAPSHOT = {
   works: [],
@@ -24,6 +29,8 @@ export default function PortfolioAdmin() {
   const [statusMessage, setStatusMessage] = useState("正在验证管理员会话...");
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadStatus, setUploadStatus] = useState("尚未选择图片。");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [compressionMessages, setCompressionMessages] = useState([]);
   const [snapshot, setSnapshot] = useState(INITIAL_SNAPSHOT);
   const [workTitle, setWorkTitle] = useState("");
   const [workSlug, setWorkSlug] = useState("");
@@ -209,6 +216,34 @@ export default function PortfolioAdmin() {
     });
   }
 
+  function resetUploadProgress(files = []) {
+    setUploadFiles(files);
+    setUploadProgress(0);
+    setCompressionMessages([]);
+    setUploadStatus(files.length > 0 ? `已选择 ${files.length} 张图片。` : "尚未选择图片。");
+  }
+
+  async function prepareFilesForUpload(files) {
+    const preparedFiles = [];
+
+    for (const [index, file] of files.entries()) {
+      if (fileNeedsCompression(file)) {
+        setUploadStatus(`正在压缩 ${file.name} (${index + 1}/${files.length})...`);
+      } else {
+        setUploadStatus(`正在检查 ${file.name} (${index + 1}/${files.length})...`);
+      }
+
+      const prepared = await prepareImageForUpload(file);
+      preparedFiles.push(prepared.file);
+      if (prepared.message) {
+        setCompressionMessages((messages) => [...messages, prepared.message]);
+      }
+      setUploadProgress(calculateUploadProgress("compress", index + 1, files.length));
+    }
+
+    return preparedFiles;
+  }
+
   async function uploadImages() {
     await runAction("正在上传图片...", async () => {
       const files = Array.from(uploadFiles);
@@ -216,17 +251,21 @@ export default function PortfolioAdmin() {
         throw new Error("请选择至少一张作品图片。");
       }
 
+      setUploadProgress(calculateUploadProgress("plan", 0, files.length));
       setUploadStatus("正在生成上传计划...");
       const plan = await reserveUploadPlan(files);
       if (plan.length !== files.length) {
         throw new Error("上传计划数量与文件数量不一致。");
       }
 
+      const preparedFiles = await prepareFilesForUpload(files);
+
       const images = [];
-      for (const [index, file] of files.entries()) {
+      for (const [index, file] of preparedFiles.entries()) {
         const plannedImage = plan[index];
-        setUploadStatus(`正在上传 ${file.name} (${index + 1}/${files.length})...`);
+        setUploadStatus(`正在上传 ${file.name} (${index + 1}/${preparedFiles.length})...`);
         const uploadedImage = await uploadToCloudinary(file, plannedImage.publicId);
+        setUploadProgress(calculateUploadProgress("upload", index + 1, preparedFiles.length));
         images.push({
           publicId: uploadedImage.public_id || plannedImage.publicId,
           secureUrl: uploadedImage.secure_url,
@@ -241,9 +280,12 @@ export default function PortfolioAdmin() {
         });
       }
 
+      setUploadProgress(calculateUploadProgress("save", 0, preparedFiles.length));
       setUploadStatus("正在保存图片记录...");
       await saveImages(images);
+      setUploadStatus("正在刷新 snapshot...");
       await fetchPortfolioSnapshot();
+      setUploadProgress(calculateUploadProgress("complete", 0, preparedFiles.length));
       setUploadStatus(`上传完成：${images.length} 张图片已保存。`);
       setStatusMessage("图片已上传并保存，snapshot 已刷新。");
     });
@@ -339,10 +381,29 @@ export default function PortfolioAdmin() {
               type="file"
               accept="image/jpeg,image/png,image/webp"
               multiple
-              onChange={(event) => setUploadFiles(Array.from(event.target.files || []))}
+              onChange={(event) => resetUploadProgress(Array.from(event.target.files || []))}
             />
           </label>
           <p className="form-hint">上传计划会根据作品 ID / 角色 ID 在服务端查 slug 并自动命名。</p>
+          <div className="upload-progress" aria-label="上传进度">
+            <div className="upload-progress-header">
+              <span>上传进度</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <div className="upload-progress-track">
+              <div className="upload-progress-bar" style={{ width: `${uploadProgress}%` }} />
+            </div>
+            <p className="form-hint">压缩详情</p>
+            {compressionMessages.length === 0 ? (
+              <p className="form-hint">暂无压缩记录。</p>
+            ) : (
+              <ul>
+                {compressionMessages.map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </ul>
+            )}
+          </div>
           <button className="button" type="button" disabled={isBusy} onClick={uploadImages}>上传图片</button>
         </div>
 

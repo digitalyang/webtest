@@ -259,7 +259,7 @@ describe("portfolio admin helper functions", () => {
     ]);
   });
 
-  test("appends static images and static-work roles into a static manifest", () => {
+  test("appends static images without exposing empty static-work roles", () => {
     const manifest = {
       photographyWorks: [
         {
@@ -313,16 +313,40 @@ describe("portfolio admin helper functions", () => {
     });
 
     const work = result.photographyWorks[0];
-    expect(work.roleCount).toBe(2);
+    expect(work.roleCount).toBe(1);
     expect(work.imageCount).toBe(2);
     expect(work.roles[0].images).toHaveLength(2);
     expect(work.roles[0].coverThumb).toContain("nina_2.webp");
-    expect(work.roles[1]).toMatchObject({
-      id: "girlsbandcry-subaru",
-      workId: "girlsbandcry",
-      title: "Subaru",
-      imageCount: 0
+    expect(work.roles.some((role) => role.id === "girlsbandcry-subaru")).toBe(false);
+  });
+
+  test("excludes static-work roles without appended images from public roles", () => {
+    const result = applyStaticPortfolioExtensions({
+      photographyWorks: [
+        {
+          id: "girlsbandcry",
+          title: "GirlsBandCry",
+          roleCount: 0,
+          imageCount: 0,
+          roles: []
+        }
+      ]
+    }, {
+      staticRoles: [
+        {
+          id: 60,
+          static_work_id: "girlsbandcry",
+          slug: "subaru",
+          title: "Subaru",
+          sort_order: 1
+        }
+      ],
+      staticImages: []
     });
+
+    expect(result.photographyWorks[0].roles.map((role) => role.id)).not.toContain("girlsbandcry-subaru");
+    expect(result.photographyWorks[0].roleCount).toBe(0);
+    expect(result.photographyWorks[0].imageCount).toBe(0);
   });
 
   test("skips static-work roles that duplicate manifest role ids", () => {
@@ -391,6 +415,15 @@ describe("portfolio admin helper functions", () => {
           cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_5.webp",
           alt: "Nina 5",
           sort_order: 5
+        },
+        {
+          id: 51,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-subaru",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/subaru/subaru_1.webp",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/subaru/subaru_1.webp",
+          alt: "Subaru 1",
+          sort_order: 1
         }
       ],
       staticRoles: [
@@ -419,10 +452,13 @@ describe("portfolio admin helper functions", () => {
     const work = result.photographyWorks[0];
     expect(work.coverThumb).toContain("nina_5.webp");
     expect(work.roleCount).toBe(2);
-    expect(work.imageCount).toBe(5);
+    expect(work.imageCount).toBe(6);
     expect(work.roles[0].coverThumb).toContain("nina_5.webp");
     expect(work.roles[0].images.at(-1).src).toContain("nina_5.webp");
-    expect(work.roles.some((role) => role.id === "girlsbandcry-subaru")).toBe(true);
+    expect(work.roles.find((role) => role.id === "girlsbandcry-subaru")).toMatchObject({
+      imageCount: 1,
+      images: [{ src: expect.stringContaining("subaru_1.webp"), alt: "Subaru 1" }]
+    });
   });
 
   test("builds admin dropdown options without exposing source labels", () => {

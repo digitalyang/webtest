@@ -34,6 +34,7 @@ describe("admin portfolio login page", () => {
 describe("admin portfolio upload page", () => {
   test("renders the full protected portfolio admin shell", () => {
     const html = renderToStaticMarkup(createElement(AdminPortfolioUploadPage));
+    const createSection = html.slice(html.indexOf("<h2>作品 / 角色</h2>"), html.indexOf("<h2>上传图片</h2>"));
     const uploadSection = html.slice(html.indexOf("<h2>上传图片</h2>"), html.indexOf("<h2>设置封面</h2>"));
 
     expect(uploadMetadata.title).toBe("作品集上传管理 - DigitalSheep");
@@ -48,11 +49,13 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("作品 slug");
     expect(html).toContain("角色标题");
     expect(html).toContain("角色 slug");
-    expect(html).toContain("作品 ID");
+    expect(html).toContain("角色所属作品");
     expect(html).toContain("选择作品");
     expect(html).toContain("选择相册");
     expect(html).toContain("目标类型");
     expect(html).toContain("图片 ID");
+    expect(html).toContain("旧作品");
+    expect(html).toContain("旧相册");
     expect(html).toContain("上传状态");
     expect(html).toContain("上传进度");
     expect(html).toContain("0%");
@@ -61,6 +64,8 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("作品 snapshot");
     expect(html).toContain("角色 snapshot");
     expect(html).toContain("图片 snapshot");
+    expect(html).toContain("追加图片 snapshot");
+    expect(createSection).not.toContain("作品 ID");
     expect(uploadSection).not.toContain("作品 slug");
     expect(uploadSection).not.toContain("角色 slug");
     expect(html).not.toContain("角色 ID");

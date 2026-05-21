@@ -23,7 +23,8 @@ const INITIAL_SNAPSHOT = {
 const VISIBILITY_ENDPOINTS = {
   work: "/api/admin/portfolio/works",
   role: "/api/admin/portfolio/roles",
-  image: "/api/admin/portfolio/images"
+  image: "/api/admin/portfolio/images",
+  "static-image": "/api/admin/portfolio/images"
 };
 
 export default function PortfolioAdmin() {
@@ -38,7 +39,7 @@ export default function PortfolioAdmin() {
   const [snapshot, setSnapshot] = useState(INITIAL_SNAPSHOT);
   const [workTitle, setWorkTitle] = useState("");
   const [workSlug, setWorkSlug] = useState("");
-  const [roleWorkId, setRoleWorkId] = useState("");
+  const [roleParentWorkKey, setRoleParentWorkKey] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
   const [roleSlug, setRoleSlug] = useState("");
   const [selectedWorkKey, setSelectedWorkKey] = useState("");
@@ -168,11 +169,18 @@ export default function PortfolioAdmin() {
 
   async function createRole() {
     await runAction("正在新建角色...", async () => {
+      const parentWork = workOptions.find((work) => work.value === roleParentWorkKey);
+      if (!parentWork) {
+        throw new Error("请选择角色所属作品。");
+      }
+
       await requestJson("/api/admin/portfolio/roles", {
         method: "POST",
-        body: { workId: roleWorkId, title: roleTitle, slug: roleSlug }
+        body: parentWork.source === "static"
+          ? { targetType: "static", staticWorkId: parentWork.id, title: roleTitle, slug: roleSlug }
+          : { workId: parentWork.id, title: roleTitle, slug: roleSlug }
       });
-      setRoleWorkId("");
+      setRoleParentWorkKey("");
       setRoleTitle("");
       setRoleSlug("");
       await fetchPortfolioSnapshot();
@@ -330,7 +338,7 @@ export default function PortfolioAdmin() {
     }
 
     await runAction("正在更新隐藏状态...", async () => {
-      await requestJson(`${endpoint}/${targetId}`, {
+      await requestJson(`${endpoint}/${encodeURIComponent(targetId)}`, {
         method: "PATCH",
         body: { isHidden }
       });
@@ -370,8 +378,13 @@ export default function PortfolioAdmin() {
           </label>
           <button className="button" type="button" disabled={isBusy} onClick={createWork}>新建作品</button>
           <label>
-            作品 ID
-            <input value={roleWorkId} onChange={(event) => setRoleWorkId(event.target.value)} placeholder="1" />
+            角色所属作品
+            <select value={roleParentWorkKey} onChange={(event) => setRoleParentWorkKey(event.target.value)}>
+              <option value="">请选择角色所属作品</option>
+              {workOptions.map((work) => (
+                <option key={work.value} value={work.value}>{work.label}</option>
+              ))}
+            </select>
           </label>
           <label>
             角色标题
@@ -447,6 +460,8 @@ export default function PortfolioAdmin() {
             <select value={coverTargetType} onChange={(event) => setCoverTargetType(event.target.value)}>
               <option value="role">角色</option>
               <option value="work">作品</option>
+              <option value="static-role">旧相册</option>
+              <option value="static-work">旧作品</option>
             </select>
           </label>
           <label>
@@ -457,7 +472,7 @@ export default function PortfolioAdmin() {
             图片 ID
             <input value={coverImageId} onChange={(event) => setCoverImageId(event.target.value)} placeholder="1" />
           </label>
-          <p className="form-hint">选择已上传图片后，可设为角色封面或作品封面。封面使用 Cloudinary 480px WebP。</p>
+          <p className="form-hint">动态作品/角色使用数字 ID；旧作品/旧相册使用字符串 ID，图片 ID 使用下方“追加图片 snapshot”的 ID。封面使用 Cloudinary 480px WebP。</p>
           <button className="button secondary" type="button" disabled={isBusy} onClick={setCover}>设置封面</button>
         </div>
 
@@ -469,6 +484,7 @@ export default function PortfolioAdmin() {
               <option value="work">作品</option>
               <option value="role">角色</option>
               <option value="image">图片</option>
+              <option value="static-image">追加图片</option>
             </select>
           </label>
           <label>
@@ -523,6 +539,19 @@ export default function PortfolioAdmin() {
             <>
               #{image.id} role:{image.role_id} {image.filename || image.cloudinary_public_id} {image.is_hidden ? "(hidden)" : ""}
               <button className="button secondary" type="button" disabled={isBusy} onClick={() => hideItem("image", image.id, !image.is_hidden)}>
+                {image.is_hidden ? "恢复" : "隐藏"}
+              </button>
+            </>
+          )}
+        />
+        <SnapshotList
+          title="追加图片 snapshot"
+          items={snapshot.staticImages}
+          emptyText="暂无静态追加图片。"
+          renderItem={(image) => (
+            <>
+              #{image.id} role:{image.static_role_id} {image.filename || image.cloudinary_public_id} {image.is_hidden ? "(hidden)" : ""}
+              <button className="button secondary" type="button" disabled={isBusy} onClick={() => hideItem("static-image", `static:${image.id}`, !image.is_hidden)}>
                 {image.is_hidden ? "恢复" : "隐藏"}
               </button>
             </>

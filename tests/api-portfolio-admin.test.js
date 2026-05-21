@@ -495,6 +495,26 @@ describe("portfolio admin API request validation", () => {
     expect(env.calls[1].values).toEqual(["role", "girlsbandcry-nina", 50]);
   });
 
+  test("hides static appended images through the image route", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ success: true }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { PATCH } = await import("../app/api/admin/portfolio/images/[imageId]/route.js");
+    const response = await PATCH(new Request("https://example.com/api/admin/portfolio/images/static%3A50", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({ isHidden: true })
+    }), {
+      params: Promise.resolve({ imageId: "static:50" })
+    });
+
+    expect(response.status).toBe(200);
+    expect(env.calls[0].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[0].values).toEqual([1, 50]);
+  });
+
   test("rejects static role covers when the image belongs to another role", async () => {
     const hash = await hashAdminPassword("secret");
     const env = createEnv([

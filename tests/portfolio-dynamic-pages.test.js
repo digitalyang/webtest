@@ -33,6 +33,15 @@ function createPortfolioEnv() {
           cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/fgo/nero/nero_5.webp",
           alt: "FGO Nero 5",
           sort_order: 5
+        },
+        {
+          id: 203,
+          static_work_id: "fgo",
+          static_role_id: "fgo-caster",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/fgo/caster/caster_1.png",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/fgo/caster/caster_1.webp",
+          alt: "FGO Caster 1",
+          sort_order: 1
         }
       ]
     },
@@ -105,6 +114,7 @@ describe("portfolio dynamic pages", () => {
     expect(fgo.coverThumb).toContain("nero_5.webp");
     expect(nero.images.at(-1).src).toContain("nero_5.png");
     expect(fgo.roles.some((role) => role.id === "fgo-caster")).toBe(true);
+    expect(fgo.roles.find((role) => role.id === "fgo-caster").imageCount).toBe(1);
   });
 
   test("does not swallow D1 query errors in merged portfolio helper", async () => {

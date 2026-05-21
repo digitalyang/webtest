@@ -303,6 +303,20 @@ describe("admin session API", () => {
 });
 
 describe("portfolio admin API request validation", () => {
+  test("rejects portfolio admin snapshots without a session", async () => {
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = await hashAdminPassword("secret");
+    sessionRouteContext.env = env;
+
+    const { GET } = await import("../app/api/admin/portfolio/route.js");
+    const response = await GET(new Request("https://example.com/api/admin/portfolio"));
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(body.error).toBe("管理员验证失败。");
+  });
+
   test("rejects static portfolio work slug conflicts through the real route", async () => {
     const hash = await hashAdminPassword("secret");
     const env = createEnv([{ id: 1, title: "FGO", slug: "fgo" }]);

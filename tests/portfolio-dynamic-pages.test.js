@@ -22,6 +22,39 @@ function createPortfolioEnv() {
           sort_order: 1
         }
       ]
+    },
+    {
+      results: [
+        {
+          id: 201,
+          static_work_id: "fgo",
+          static_role_id: "fgo-nero",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/fgo/nero/nero_5.png",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/fgo/nero/nero_5.webp",
+          alt: "FGO Nero 5",
+          sort_order: 5
+        }
+      ]
+    },
+    {
+      results: [
+        {
+          id: 202,
+          static_work_id: "fgo",
+          slug: "caster",
+          title: "Caster",
+          sort_order: 2
+        }
+      ]
+    },
+    {
+      results: [
+        {
+          target_type: "work",
+          target_id: "fgo",
+          image_id: 201
+        }
+      ]
     }
   ];
 
@@ -63,10 +96,15 @@ describe("portfolio dynamic pages", () => {
 
   test("merges static and D1 portfolio rows for public pages", async () => {
     const merged = await getMergedPortfolioData(createPortfolioEnv(), manifest);
+    const fgo = merged.photographyWorks.find((work) => work.id === "fgo");
+    const nero = fgo.roles.find((role) => role.id === "fgo-nero");
 
     expect(merged.photographyWorks.some((work) => work.id === "fgo")).toBe(true);
     expect(merged.photographyWorks.some((work) => work.id === "cloud-work")).toBe(true);
     expect(merged.photographyWorks.find((work) => work.id === "cloud-work").coverThumb).toContain("cloud-role_1.webp");
+    expect(fgo.coverThumb).toContain("nero_5.webp");
+    expect(nero.images.at(-1).src).toContain("nero_5.png");
+    expect(fgo.roles.some((role) => role.id === "fgo-caster")).toBe(true);
   });
 
   test("does not swallow D1 query errors in merged portfolio helper", async () => {

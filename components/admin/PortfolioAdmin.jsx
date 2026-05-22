@@ -7,6 +7,10 @@ import {
   fileNeedsCompression,
   prepareImageForUpload
 } from "../../lib/client/image-compression";
+import {
+  buildCoverPhotoOptions,
+  getCoverPayload
+} from "../../lib/client/portfolio-cover-options";
 
 const INITIAL_SNAPSHOT = {
   works: [],
@@ -325,58 +329,16 @@ export default function PortfolioAdmin() {
     });
   }
 
-  function buildCoverPhotoOptions(role, currentSnapshot) {
-    if (!role) return [];
-
-    if (role.workSource === "dynamic") {
-      return currentSnapshot.images
-        .filter((image) => String(image.role_id) === String(role.id))
-        .map((image) => ({
-          source: "dynamic",
-          id: image.id,
-          label: image.filename || image.cloudinary_public_id || `#${image.id}`,
-          value: `dynamic:${image.id}`
-        }));
-    }
-
-    return currentSnapshot.staticImages
-      .filter((image) => String(image.static_role_id) === String(role.id))
-      .map((image) => ({
-        source: "static",
-        id: image.id,
-        label: image.filename || image.cloudinary_public_id || `#${image.id}`,
-        value: `static:${image.id}`
-      }));
-  }
-
-  function getCoverPayload() {
-    if (!selectedCoverWork) {
-      throw new Error("请选择作品。");
-    }
-    if (!selectedCoverRole) {
-      throw new Error("请选择角色。");
-    }
-    if (!selectedCoverPhoto) {
-      throw new Error("请选择封面照片。");
-    }
-
-    const imageId = selectedCoverPhoto.id;
-    if (coverTargetType === "work") {
-      return selectedCoverWork.source === "dynamic"
-        ? { targetType: "work", targetId: selectedCoverWork.id, imageId }
-        : { targetType: "static-work", targetId: selectedCoverWork.id, imageId };
-    }
-
-    return selectedCoverRole.source === "dynamic"
-      ? { targetType: "role", targetId: selectedCoverRole.id, imageId }
-      : { targetType: "static-role", targetId: selectedCoverRole.id, imageId };
-  }
-
   async function setCover() {
     await runAction("正在设置封面...", async () => {
       await requestJson("/api/admin/portfolio/covers", {
         method: "POST",
-        body: getCoverPayload()
+        body: getCoverPayload({
+          coverTargetType,
+          selectedCoverWork,
+          selectedCoverRole,
+          selectedCoverPhoto
+        })
       });
       await fetchPortfolioSnapshot();
       setCoverPhotoKey("");

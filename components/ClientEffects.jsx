@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { detectGenshinPlatform, genshinDownloadLinks } from "../lib/genshin";
 import { useToast } from "./ToastProvider";
@@ -51,6 +51,7 @@ function trackPageView() {
 export default function ClientEffects() {
   const showToast = useToast();
   const pathname = usePathname();
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
     const downloadInfo = genshinDownloadLinks[detectGenshinPlatform()];
@@ -89,5 +90,31 @@ export default function ClientEffects() {
     };
   }, [showToast]);
 
-  return null;
+  useEffect(() => {
+    function handleScroll() {
+      setShowBackToTop(window.scrollY > 420);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  return (
+    <button
+      className={`back-to-top${showBackToTop ? " is-visible" : ""}`}
+      type="button"
+      aria-label="回到顶部"
+      onClick={scrollToTop}
+    >
+      <span aria-hidden="true">🚀</span>
+    </button>
+  );
 }

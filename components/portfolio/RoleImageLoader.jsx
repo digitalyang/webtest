@@ -19,7 +19,7 @@ export default function RoleImageLoader({ images = [] }) {
         {visibleImages.map((image) => (
           <a
             key={image.src}
-            className="portfolio-thumb portfolio-original-thumb"
+            className="portfolio-thumb portfolio-original-thumb portfolio-fit-contain"
             href={resolveImageSrc(image.src)}
             target="_blank"
             rel="noopener noreferrer"

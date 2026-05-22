@@ -132,4 +132,11 @@ describe("portfolio role page", () => {
     expect(html).toContain("Daji_1.jpeg");
     expect(html).not.toContain(".thumb.webp");
   });
+
+  test("marks original role images for full-content fitting", () => {
+    const html = renderRoleImages([{ src: "assets/images/HOK/Daji/Wide_1.jpeg", alt: "HOK wide photo" }]);
+
+    expect(html).toContain("portfolio-fit-contain");
+    expect(html).toContain("Wide_1.jpeg");
+  });
 });

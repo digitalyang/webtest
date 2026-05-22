@@ -98,6 +98,38 @@ textarea {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
 }
 
+.back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-cyan) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px) scale(0.92);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top span {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
 .hero,
 .panel {
   padding: 40px 24px;
@@ -818,10 +850,22 @@ footer {
 
 .portfolio-original-grid {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  align-items: start;
 }
 
 .portfolio-original-thumb {
-  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  min-height: clamp(180px, 56vw, 420px);
+  aspect-ratio: auto;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.portfolio-fit-contain img {
+  width: 100%;
+  height: auto;
+  max-height: min(72vh, 640px);
+  object-fit: contain;
 }
 
 .portfolio-load-more {
@@ -958,14 +1002,69 @@ footer {
 }
 
 @media (max-width: 640px) {
+  .page {
+    width: min(1100px, calc(100% - 24px));
+    padding-top: 82px;
+  }
+
   .navbar {
-    align-items: flex-start;
-    flex-direction: column;
-    border-radius: 24px;
+    position: fixed;
+    top: 10px;
+    right: 12px;
+    left: 12px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+    padding: 9px 12px;
+    border-radius: 22px;
+  }
+
+  .logo {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .nav-links {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
     justify-content: flex-start;
+    min-width: 0;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-links a {
+    flex: 0 0 auto;
+    padding: 7px 10px;
+    white-space: nowrap;
+    font-size: 0.88rem;
+  }
+
+  .portfolio-original-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-original-thumb {
+    min-height: 0;
+    padding: 8px;
+  }
+
+  .portfolio-fit-contain img {
+    max-height: 68vh;
+  }
+
+  .back-to-top {
+    right: 14px;
+    bottom: 18px;
+    width: 44px;
+    height: 44px;
   }
 
   .about-profile {

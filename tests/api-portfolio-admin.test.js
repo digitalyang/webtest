@@ -182,7 +182,9 @@ describe("portfolio admin D1 helpers", () => {
       {
         id: 9,
         cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
-        cover_thumb_url: "thumb.webp"
+        cover_thumb_url: "thumb.webp",
+        work_id: 1,
+        role_id: 2
       },
       { success: true },
       { success: true }
@@ -217,6 +219,49 @@ describe("portfolio admin D1 helpers", () => {
     expect(env.calls[1].sql).toContain("UPDATE portfolio_images SET cover_thumb_url");
     expect(env.calls[1].values[0]).toContain("c_fill,w_480,f_webp,q_auto");
     expect(env.calls[2].sql).toContain("UPDATE portfolio_roles SET cover_image_id");
+  });
+
+  test("rejects dynamic role covers from other roles", async () => {
+    const env = createEnv([
+      {
+        id: 20,
+        cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
+        cover_thumb_url: "thumb.webp",
+        work_id: 1,
+        role_id: 3
+      }
+    ]);
+
+    await expect(setPortfolioCover(env, { targetType: "role", targetId: 2, imageId: 20 }))
+      .rejects.toThrow("动态封面图片无效。");
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_roles"))).toBe(false);
+  });
+
+  test("rejects dynamic work covers from other works", async () => {
+    const env = createEnv([
+      {
+        id: 20,
+        cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
+        cover_thumb_url: "thumb.webp",
+        work_id: 2,
+        role_id: 3
+      }
+    ]);
+
+    await expect(setPortfolioCover(env, { targetType: "work", targetId: 1, imageId: 20 }))
+      .rejects.toThrow("动态封面图片无效。");
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_works"))).toBe(false);
+  });
+
+  test("rejects dynamic covers when the image is missing", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(setPortfolioCover(env, { targetType: "role", targetId: 2, imageId: 20 }))
+      .rejects.toThrow("动态封面图片无效。");
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_roles"))).toBe(false);
   });
 
   test("loads dynamic portfolio rows", async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import PortfolioAdminLogin from "./PortfolioAdminLogin";
 
@@ -15,6 +15,8 @@ const SESSION_EXPIRED_MESSAGE = "管理员登录已过期，请重新登录。";
 
 export default function MessageAdmin() {
   const router = useRouter();
+  const mountedRef = useRef(false);
+  const latestRequestRef = useRef(0);
   const [data, setData] = useState(INITIAL_DATA);
   const [activeQuery, setActiveQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +27,13 @@ export default function MessageAdmin() {
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
 
   useEffect(() => {
+    mountedRef.current = true;
     loadMessages();
+
+    return () => {
+      mountedRef.current = false;
+      latestRequestRef.current += 1;
+    };
   }, []);
 
   async function requestJson(url, { method = "GET" } = {}) {
@@ -55,12 +63,21 @@ export default function MessageAdmin() {
   }
 
   async function loadMessages({ nextPage = data.page, nextQuery = activeQuery } = {}) {
-    setIsBusy(true);
-    setErrorMessage("");
-    setStatusMessage("正在加载留言...");
+    const requestId = latestRequestRef.current + 1;
+    latestRequestRef.current = requestId;
+
+    if (mountedRef.current) {
+      setIsBusy(true);
+      setErrorMessage("");
+      setStatusMessage("正在加载留言...");
+    }
 
     try {
       const nextData = await requestJson(buildMessagesUrl(nextPage, nextQuery));
+      if (!isCurrentRequest(requestId)) {
+        return false;
+      }
+
       setData({
         messages: Array.isArray(nextData.messages) ? nextData.messages : [],
         total: Number(nextData.total || 0),
@@ -69,19 +86,31 @@ export default function MessageAdmin() {
       });
       setNeedsLogin(false);
       setStatusMessage("留言列表已加载。");
+      return true;
     } catch (error) {
+      if (!isCurrentRequest(requestId)) {
+        return false;
+      }
+
       if (error?.status === 401) {
         setNeedsLogin(true);
         setStatusMessage(SESSION_EXPIRED_MESSAGE);
         setErrorMessage(SESSION_EXPIRED_MESSAGE);
-        return;
+        return false;
       }
 
       setErrorMessage(error instanceof Error ? error.message : "留言列表加载失败。");
       setStatusMessage("留言列表加载失败。");
+      return false;
     } finally {
-      setIsBusy(false);
+      if (isCurrentRequest(requestId)) {
+        setIsBusy(false);
+      }
     }
+  }
+
+  function isCurrentRequest(requestId) {
+    return mountedRef.current && latestRequestRef.current === requestId;
   }
 
   async function submitSearch(event) {
@@ -111,9 +140,15 @@ export default function MessageAdmin() {
         method: "DELETE"
       });
       const nextPage = data.messages.length <= 1 && data.page > 1 ? data.page - 1 : data.page;
-      await loadMessages({ nextPage, nextQuery: activeQuery });
-      setStatusMessage("留言已永久删除。");
+      const refreshed = await loadMessages({ nextPage, nextQuery: activeQuery });
+      if (refreshed && mountedRef.current) {
+        setStatusMessage("留言已永久删除。");
+      }
     } catch (error) {
+      if (!mountedRef.current) {
+        return;
+      }
+
       if (error?.status === 401) {
         setNeedsLogin(true);
         setStatusMessage(SESSION_EXPIRED_MESSAGE);
@@ -124,7 +159,9 @@ export default function MessageAdmin() {
       setErrorMessage(error instanceof Error ? error.message : "留言删除失败。");
       setStatusMessage("留言删除失败。");
     } finally {
-      setIsBusy(false);
+      if (mountedRef.current) {
+        setIsBusy(false);
+      }
     }
   }
 

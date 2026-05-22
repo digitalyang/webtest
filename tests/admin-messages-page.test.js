@@ -255,6 +255,134 @@ describe("message admin page", () => {
       });
     }
   });
+
+  test("does not show delete success when the refresh after delete fails", async () => {
+    let listRequestCount = 0;
+    const fetchMock = vi.fn(async (url, options = {}) => {
+      if (url === "/api/admin/messages?page=1&pageSize=10&q=") {
+        listRequestCount += 1;
+        if (listRequestCount === 1) {
+          return jsonResponse({
+            messages: [{ id: 5, name: "Momo", content: "需要删除的留言", time: "2026-05-22T03:00:00.000Z" }],
+            total: 1,
+            page: 1,
+            pageSize: 10
+          });
+        }
+
+        return jsonResponse({ error: "刷新失败。" }, 500);
+      }
+
+      if (url === "/api/admin/messages/5" && options.method === "DELETE") {
+        return jsonResponse({ ok: true });
+      }
+
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubGlobal("confirm", vi.fn(() => true));
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    try {
+      await act(async () => {
+        root.render(createElement(MessageAdmin));
+      });
+
+      await act(async () => {
+        getButton(container, "永久删除").click();
+      });
+
+      expect(container.textContent).toContain("刷新失败。");
+      expect(container.textContent).not.toContain("留言已永久删除。");
+    } finally {
+      await act(async () => {
+        root.unmount();
+      });
+    }
+  });
+
+  test("ignores stale message list responses", async () => {
+    const pendingSearches = new Map();
+    const fetchMock = vi.fn((url) => {
+      if (url === "/api/admin/messages?page=1&pageSize=10&q=") {
+        return Promise.resolve(jsonResponse({
+          messages: [],
+          total: 0,
+          page: 1,
+          pageSize: 10
+        }));
+      }
+
+      if (url === "/api/admin/messages?page=1&pageSize=10&q=slow") {
+        return new Promise((resolve) => {
+          pendingSearches.set("slow", resolve);
+        });
+      }
+
+      if (url === "/api/admin/messages?page=1&pageSize=10&q=fast") {
+        return new Promise((resolve) => {
+          pendingSearches.set("fast", resolve);
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    try {
+      await act(async () => {
+        root.render(createElement(MessageAdmin));
+      });
+
+      const searchInput = container.querySelector("input[placeholder='按昵称或留言内容搜索']");
+      const searchForm = container.querySelector("form");
+      await act(async () => {
+        setInputValue(searchInput, "slow");
+      });
+      await act(async () => {
+        searchForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      });
+      await act(async () => {
+        setInputValue(searchInput, "fast");
+      });
+      await act(async () => {
+        searchForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      });
+
+      await act(async () => {
+        pendingSearches.get("fast")(jsonResponse({
+          messages: [{ id: 2, name: "Fast", content: "最新结果", time: "2026-05-22T05:00:00.000Z" }],
+          total: 1,
+          page: 1,
+          pageSize: 10
+        }));
+      });
+      expect(container.textContent).toContain("最新结果");
+
+      await act(async () => {
+        pendingSearches.get("slow")(jsonResponse({
+          messages: [{ id: 1, name: "Slow", content: "旧结果", time: "2026-05-22T04:00:00.000Z" }],
+          total: 1,
+          page: 1,
+          pageSize: 10
+        }));
+      });
+
+      expect(container.textContent).toContain("最新结果");
+      expect(container.textContent).not.toContain("旧结果");
+    } finally {
+      await act(async () => {
+        root.unmount();
+      });
+    }
+  });
 });
 
 function jsonResponse(data, status = 200) {

@@ -157,6 +157,7 @@ describe("message admin API helper", () => {
     await handleAdminMessagesRequest(request, env);
 
     expect(env.calls[0].values).toEqual(["%100\\%\\_\\\\%", "%100\\%\\_\\\\%"]);
+    expect(env.calls[1].sql).toContain("WHERE (name LIKE ? ESCAPE '\\' OR content LIKE ? ESCAPE '\\')");
     expect(env.calls[1].values).toEqual(["%100\\%\\_\\\\%", "%100\\%\\_\\\\%", 10, 0]);
   });
 

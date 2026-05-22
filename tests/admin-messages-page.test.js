@@ -63,31 +63,33 @@ describe("message admin page", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
-      root.render(createElement(PortfolioAdminLogin, { redirectTo: "/admin/messages" }));
-    });
+    try {
+      await act(async () => {
+        root.render(createElement(PortfolioAdminLogin, { redirectTo: "/admin/messages" }));
+      });
 
-    const passwordInput = container.querySelector("input[type='password']");
-    const loginButton = container.querySelector("button");
+      const passwordInput = container.querySelector("input[type='password']");
+      const loginButton = container.querySelector("button");
 
-    await act(async () => {
-      passwordInput.value = "correct-password";
-      passwordInput.dispatchEvent(new Event("input", { bubbles: true }));
-      loginButton.click();
-    });
+      await act(async () => {
+        passwordInput.value = "correct-password";
+        passwordInput.dispatchEvent(new Event("input", { bubbles: true }));
+        loginButton.click();
+      });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith("/api/admin/session", expect.objectContaining({
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }));
+      expect(globalThis.fetch).toHaveBeenCalledWith("/api/admin/session", expect.objectContaining({
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }));
 
-    await act(async () => {
-      root.unmount();
-    });
-
-    expect(routerMocks.push).toHaveBeenCalledWith("/admin/messages");
+      expect(routerMocks.push).toHaveBeenCalledWith("/admin/messages");
+    } finally {
+      await act(async () => {
+        root.unmount();
+      });
+    }
   });
 });

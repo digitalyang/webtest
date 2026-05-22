@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function PortfolioAdminLogin() {
+export default function PortfolioAdminLogin({ redirectTo = "/admin/portfolio/upload", onLogin }) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [isBusy, setIsBusy] = useState(false);
@@ -29,7 +29,11 @@ export default function PortfolioAdminLogin() {
       }
 
       setPassword("");
-      router.push("/admin/portfolio/upload");
+      if (onLogin) {
+        await onLogin();
+      } else {
+        router.push(redirectTo);
+      }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "登录失败。");
     } finally {

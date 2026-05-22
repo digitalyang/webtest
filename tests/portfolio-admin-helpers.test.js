@@ -461,6 +461,55 @@ describe("portfolio admin helper functions", () => {
     });
   });
 
+  test("keeps imported static cover candidates out of public role galleries", () => {
+    const result = applyStaticPortfolioExtensions({
+      photographyWorks: [
+        {
+          id: "girlsbandcry",
+          title: "GirlsBandCry",
+          coverThumb: "old-work-cover.webp",
+          roleCount: 1,
+          imageCount: 1,
+          roles: [
+            {
+              id: "girlsbandcry-nina",
+              workId: "girlsbandcry",
+              title: "Nina",
+              coverThumb: "old-role-cover.webp",
+              imageCount: 1,
+              images: [{ src: "nina_1.jpeg", alt: "Nina 1" }]
+            }
+          ]
+        }
+      ]
+    }, {
+      staticImages: [
+        {
+          id: 70,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-nina",
+          cloudinary_public_id: "webtest/portfolio-covers/girlsbandcry/nina/nina_1",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio-covers/girlsbandcry/nina/nina_1.webp",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio-covers/girlsbandcry/nina/nina_1.webp",
+          alt: "Nina 1",
+          sort_order: 1
+        }
+      ],
+      coverOverrides: [
+        {
+          target_type: "role",
+          target_id: "girlsbandcry-nina",
+          image_id: 70
+        }
+      ]
+    });
+
+    const role = result.photographyWorks[0].roles[0];
+    expect(role.coverThumb).toContain("portfolio-covers/girlsbandcry/nina/nina_1.webp");
+    expect(role.imageCount).toBe(1);
+    expect(role.images).toEqual([{ src: "nina_1.jpeg", alt: "Nina 1" }]);
+  });
+
   test("builds admin dropdown options without exposing source labels", () => {
     const options = buildAdminPortfolioOptions({
       staticManifest: {

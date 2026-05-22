@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { createAdminSessionCookie, hashAdminPassword } from "../lib/server/admin-auth.js";
 import {
@@ -11,6 +11,12 @@ const routeContext = vi.hoisted(() => ({ env: {} }));
 vi.mock("../lib/server/cloudflare", () => ({
   getRequestContext: () => ({ env: routeContext.env })
 }));
+
+afterEach(() => {
+  vi.resetModules();
+  vi.doUnmock("../lib/server/message-admin.js");
+  routeContext.env = {};
+});
 
 function createEnv(responses = []) {
   const calls = [];
@@ -110,7 +116,8 @@ describe("message admin API helper", () => {
       pageSize: 10
     });
     expect(env.calls[0].sql).toContain("SELECT COUNT(*) AS count FROM messages");
-    expect(env.calls[1].sql).toContain("ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    expect(env.calls[1].sql).toContain("ORDER BY created_at DESC");
+    expect(env.calls[1].sql).toContain("LIMIT ? OFFSET ?");
     expect(env.calls[1].values).toEqual([10, 0]);
   });
 
@@ -152,8 +159,24 @@ describe("message admin API helper", () => {
     expect(env.calls[0].values).toEqual(["%100\\%\\_\\\\%", "%100\\%\\_\\\\%"]);
   });
 
+  test("rejects delete requests without a valid admin session", async () => {
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = await hashAdminPassword("secret");
+    const request = new Request("https://example.com/api/admin/messages/9", {
+      method: "DELETE"
+    });
+
+    const response = await handleDeleteAdminMessageRequest(request, env, "9");
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(body.error).toBe("管理员登录已过期，请重新登录。");
+    expect(env.calls).toEqual([]);
+  });
+
   test("deletes an existing message permanently", async () => {
-    const env = createEnv([{ id: 9 }, { success: true }]);
+    const env = createEnv([{ success: true, meta: { changes: 1 } }]);
     const request = await createAuthedRequest(
       "https://example.com/api/admin/messages/9",
       env,
@@ -165,14 +188,13 @@ describe("message admin API helper", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual({ ok: true });
-    expect(env.calls[0].sql).toContain("SELECT id FROM messages WHERE id = ?");
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("DELETE FROM messages WHERE id = ?");
     expect(env.calls[0].values).toEqual([9]);
-    expect(env.calls[1].sql).toContain("DELETE FROM messages WHERE id = ?");
-    expect(env.calls[1].values).toEqual([9]);
   });
 
   test("returns 404 when deleting a missing message", async () => {
-    const env = createEnv([undefined]);
+    const env = createEnv([{ success: true, meta: { changes: 0 } }]);
     const request = await createAuthedRequest(
       "https://example.com/api/admin/messages/404",
       env,
@@ -184,7 +206,9 @@ describe("message admin API helper", () => {
 
     expect(response.status).toBe(404);
     expect(body.error).toBe("留言不存在或已被删除。");
-    expect(env.calls.some((call) => call.sql.includes("DELETE FROM messages"))).toBe(false);
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("DELETE FROM messages WHERE id = ?");
+    expect(env.calls[0].values).toEqual([404]);
   });
 
   test("rejects invalid message ids before querying D1", async () => {

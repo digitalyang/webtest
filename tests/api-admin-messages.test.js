@@ -209,6 +209,15 @@ describe("message admin route handlers", () => {
     const env = createEnv([{ count: 0 }, { results: [] }]);
     routeContext.env = env;
     const request = await createAuthedRequest("https://example.com/api/admin/messages", env);
+    const handleAdminMessagesRequestMock = vi.fn(async () =>
+      Response.json({ messages: [], total: 0, page: 1, pageSize: 20 })
+    );
+
+    vi.resetModules();
+    vi.doMock("../lib/server/message-admin.js", () => ({
+      handleAdminMessagesRequest: handleAdminMessagesRequestMock,
+      handleDeleteAdminMessageRequest: vi.fn()
+    }));
     const { GET } = await import("../app/api/admin/messages/route.js");
 
     const response = await GET(request);
@@ -216,6 +225,8 @@ describe("message admin route handlers", () => {
 
     expect(response.status).toBe(200);
     expect(body.messages).toEqual([]);
+    expect(handleAdminMessagesRequestMock).toHaveBeenCalledOnce();
+    expect(handleAdminMessagesRequestMock).toHaveBeenCalledWith(request, env);
   });
 
   test("DELETE delegates to the admin message helper", async () => {
@@ -226,6 +237,13 @@ describe("message admin route handlers", () => {
       env,
       { method: "DELETE" }
     );
+    const handleDeleteAdminMessageRequestMock = vi.fn(async () => Response.json({ ok: true }));
+
+    vi.resetModules();
+    vi.doMock("../lib/server/message-admin.js", () => ({
+      handleAdminMessagesRequest: vi.fn(),
+      handleDeleteAdminMessageRequest: handleDeleteAdminMessageRequestMock
+    }));
     const { DELETE } = await import("../app/api/admin/messages/[messageId]/route.js");
 
     const response = await DELETE(request, { params: Promise.resolve({ messageId: "5" }) });
@@ -233,5 +251,7 @@ describe("message admin route handlers", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual({ ok: true });
+    expect(handleDeleteAdminMessageRequestMock).toHaveBeenCalledOnce();
+    expect(handleDeleteAdminMessageRequestMock).toHaveBeenCalledWith(request, env, "5");
   });
 });

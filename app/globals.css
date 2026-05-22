@@ -45,6 +45,7 @@ a {
 a,
 button,
 input,
+select,
 textarea {
   cursor: var(--star-cursor);
 }
@@ -366,7 +367,9 @@ h1 {
   font-weight: 800;
 }
 
-.admin-card input {
+.admin-card input,
+.admin-card select,
+.admin-card textarea {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--border);
@@ -374,6 +377,33 @@ h1 {
   color: var(--text);
   background: rgba(15, 23, 42, 0.78);
   font: inherit;
+}
+
+.admin-card textarea {
+  min-height: 220px;
+  resize: vertical;
+}
+
+.admin-list {
+  display: grid;
+  gap: 12px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.admin-list li {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.diary-content {
+  color: var(--muted);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 
 .upload-progress {

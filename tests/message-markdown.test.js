@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { renderMarkdown } from "../lib/message-markdown.js";
 
@@ -27,5 +27,22 @@ describe("renderMarkdown", () => {
 
     expect(html).toContain("第一行<br>");
     expect(html).toContain("第二行");
+  });
+
+  test("renders safely without a document global", () => {
+    const originalDocument = globalThis.document;
+    vi.stubGlobal("document", undefined);
+
+    try {
+      const html = renderMarkdown("**服务端** [危险](javascript:alert(1)) [官网](https://example.com)");
+
+      expect(html).toContain("<strong>服务端</strong>");
+      expect(html).toContain('href="https://example.com"');
+      expect(html).toContain('target="_blank"');
+      expect(html).not.toContain("javascript:");
+    } finally {
+      vi.stubGlobal("document", originalDocument);
+      vi.unstubAllGlobals();
+    }
   });
 });

@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function PortfolioAdminLogin() {
+export default function PortfolioAdminLogin({
+  ariaLabel = "作品集管理登录",
+  redirectTo = "/admin/portfolio/upload"
+}) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [isBusy, setIsBusy] = useState(false);
@@ -29,7 +32,7 @@ export default function PortfolioAdminLogin() {
       }
 
       setPassword("");
-      router.push("/admin/portfolio/upload");
+      router.push(redirectTo);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "登录失败。");
     } finally {
@@ -38,7 +41,7 @@ export default function PortfolioAdminLogin() {
   }
 
   return (
-    <section className="admin-panel" aria-label="作品集管理登录">
+    <section className="admin-panel" aria-label={ariaLabel}>
       {errorMessage ? <p className="form-error" role="alert">错误消息：{errorMessage}</p> : null}
       <div className="admin-card">
         <h2>管理员登录</h2>

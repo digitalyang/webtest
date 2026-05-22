@@ -26,6 +26,7 @@ describe("message admin page", () => {
     expect(html).toContain("上一页");
     expect(html).toContain("下一页");
     expect(html).toContain("永久删除");
+    expect(html).toContain("永久删除前会要求确认，删除后不可恢复。");
   });
 
   test("login component can redirect back to message admin", () => {

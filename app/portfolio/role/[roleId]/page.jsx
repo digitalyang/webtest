@@ -20,7 +20,7 @@ export async function generateMetadata({ params }) {
   const result = findRoleById(manifest, roleId);
 
   return {
-    title: `${result ? `${result.work.title} · ${result.role.title}` : "角色图片"} - 个人主页`
+    title: `${result ? `${result.work.title} · ${result.role.title}` : "角色图片"} - DigitalSheep's Space`
   };
 }
 

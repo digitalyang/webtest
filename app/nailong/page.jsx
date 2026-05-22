@@ -2,7 +2,7 @@ import Link from "next/link";
 import NailongMeme from "../../components/NailongMeme";
 
 export const metadata = {
-  title: "奶龙表情包 - 个人主页"
+  title: "奶龙表情包 - DigitalSheep's Space"
 };
 
 export default function NailongPage() {

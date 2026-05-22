@@ -2,7 +2,7 @@ import Link from "next/link";
 import MessagesBoard from "../../components/MessagesBoard";
 
 export const metadata = {
-  title: "留言板 - 个人主页"
+  title: "留言板 - DigitalSheep's Space"
 };
 
 export default function MessagesPage() {

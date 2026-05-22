@@ -5,7 +5,7 @@ import { getRequestContext } from "../../lib/server/cloudflare";
 import { getMergedPortfolioData } from "../../lib/server/portfolio-admin";
 
 export const metadata = {
-  title: "作品集 - 个人主页"
+  title: "作品集 - DigitalSheep's Space"
 };
 
 export const dynamic = "force-dynamic";

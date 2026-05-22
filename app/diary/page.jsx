@@ -4,7 +4,7 @@ import { getRequestContext } from "../../lib/server/cloudflare";
 import { listDiaryEntries } from "../../lib/server/diary";
 
 export const metadata = {
-  title: "日记分享 - 个人主页"
+  title: "日记分享 - DigitalSheep's Space"
 };
 
 export const dynamic = "force-dynamic";

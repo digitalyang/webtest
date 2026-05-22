@@ -18,7 +18,7 @@ export async function generateMetadata({ params }) {
   const work = findWorkById(manifest, workId);
 
   return {
-    title: `${work?.title || "作品详情"} - 个人主页`
+    title: `${work?.title || "作品详情"} - DigitalSheep's Space`
   };
 }
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "原神下载 - 个人主页"
+  title: "原神下载 - DigitalSheep's Space"
 };
 
 export default function GenshinPage() {

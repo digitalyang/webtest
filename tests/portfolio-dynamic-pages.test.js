@@ -92,7 +92,7 @@ describe("portfolio dynamic pages", () => {
       params: Promise.resolve({ workId: "fgo" })
     });
 
-    expect(metadata.title).toBe("FGO - 个人主页");
+    expect(metadata.title).toBe("FGO - DigitalSheep's Space");
   });
 
   test("reads async role params when generating metadata", async () => {
@@ -100,7 +100,7 @@ describe("portfolio dynamic pages", () => {
       params: Promise.resolve({ roleId: "fgo-nero" })
     });
 
-    expect(metadata.title).toBe("FGO · Nero - 个人主页");
+    expect(metadata.title).toBe("FGO · Nero - DigitalSheep's Space");
   });
 
   test("merges static and D1 portfolio rows for public pages", async () => {

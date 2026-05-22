@@ -9,7 +9,6 @@ const links = [
   { href: "/portfolio", label: "作品集", match: (pathname) => pathname.startsWith("/portfolio") },
   { href: "/diary", label: "日记分享", match: (pathname) => pathname === "/diary" },
   { href: "/messages", label: "留言板", match: (pathname) => pathname === "/messages" },
-  { href: "/stats", label: "访问统计", match: (pathname) => pathname === "/stats" },
   { href: "/nailong", label: "奶龙表情包", match: (pathname) => pathname === "/nailong" }
 ];
 

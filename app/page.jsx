@@ -58,13 +58,6 @@ export default function HomePage() {
           </div>
         </Link>
 
-        <Link className="card" href="/stats">
-          <div className="card-content">
-            <h2>访问统计</h2>
-            <p>通过 D1 记录访问量，并展示页面访问排行。</p>
-          </div>
-        </Link>
-
         <Link className="card" href="/nailong">
           <div className="card-content">
             <h2>奶龙表情包</h2>

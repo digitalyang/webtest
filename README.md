@@ -1,6 +1,6 @@
 # webtest
 
-个人主页项目，已重构为 Next.js App Router，并通过 `@opennextjs/cloudflare` 部署到 Cloudflare Workers。留言板和访问统计继续使用 Cloudflare D1。
+个人主页项目，已重构为 Next.js App Router，并通过 `@opennextjs/cloudflare` 部署到 Cloudflare Workers。留言板、作品集管理数据和访问埋点使用 Cloudflare D1。
 
 - 线上地址：[https://webtest.digitalyang2002.workers.dev/](https://webtest.digitalyang2002.workers.dev/)
 - Cloudflare 管理页面：[Workers & Pages](https://dash.cloudflare.com/61f11b4f67679695a8ef80b030c3eb51/workers-and-pages)
@@ -10,8 +10,10 @@
 
 - 首页、个人简介、作品集、日记分享等页面由 Next.js 静态预渲染。
 - 作品集：`/portfolio` 展示分类；`/portfolio/work/[workId]` 展示角色；`/portfolio/role/[roleId]` 分批加载原图。
+- 作品集后台：支持新建动态作品/角色、上传 Cloudinary 图片、追加静态作品图片、设置作品/角色封面，并为具体图片维护 `CN：<圈名>` 标注。
+- 静态作品封面：可把旧本地静态图片导入为 480px Cloudinary WebP 封面候选，原始大图仍保留在站点静态资源中。
 - 留言板：通过 `/api/messages` 写入和读取 D1 留言数据，支持 Markdown 安全渲染。
-- 访问统计：通过 `/api/stats` 记录访问量并展示页面排行。
+- 访问埋点：通过 `/api/stats` 的 POST 记录访问量；统计读取不向前端公开。
 - 奶龙表情包、原神下载、点击星星、Toast 等客户端交互保留。
 - 留言防滥用：包含蜜罐字段、频率限制、重复内容检测和危险内容过滤。
 
@@ -53,6 +55,16 @@ npm run generate:portfolio-thumbs
 npm run generate:portfolio
 ```
 
+导入旧静态作品的 Cloudinary 封面候选：
+
+```sh
+npm run import:static-portfolio:dry-run
+npm run import:static-portfolio:local
+npm run import:static-portfolio:remote
+```
+
+导入脚本只上传 480px WebP 封面候选到 `webtest/portfolio-covers/...`，不会上传完整静态大图。远程导入前建议先运行 dry-run 确认将处理的图片列表。
+
 生产构建并生成 OpenNext Cloudflare 产物：
 
 ```sh
@@ -87,13 +99,15 @@ npm run d1:migrate:remote
 
 当前 D1 绑定名称为 `DB`，数据库名为 `webtest-db`，配置在 `wrangler.toml` 中。Next Route Handlers 通过 OpenNext Cloudflare 上下文读取该绑定。
 
+当前数据库迁移包含留言、日记、作品集后台、静态追加图片和作品图片 CN 标注等表。新增功能上线前需要先运行对应的 D1 migration。
+
 ## 测试
 
 ```sh
 npm test
 ```
 
-测试覆盖作品集 manifest、作品集导航 helper、Markdown 安全渲染、D1 API helper 和旧 URL 映射。
+测试覆盖作品集 manifest、作品集导航 helper、作品集后台 API、CN 标注、Markdown 安全渲染、D1 API helper 和旧 URL 映射。
 
 ## 部署
 

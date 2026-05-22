@@ -25,6 +25,7 @@ export default function RoleImageLoader({ images = [] }) {
             rel="noopener noreferrer"
           >
             <img src={resolveImageSrc(image.src)} alt={image.alt} loading="lazy" width="480" height="640" />
+            {image.coserName ? <span className="portfolio-credit-badge">CN：{image.coserName}</span> : null}
           </a>
         ))}
       </div>

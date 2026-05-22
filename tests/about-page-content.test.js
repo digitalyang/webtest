@@ -148,6 +148,8 @@ describe("DigitalSheep public site identity", () => {
     expect(html).toContain("DigitalSheep");
     expect(html).toContain("不玩游戏不看动漫");
     expect(html).toContain("嵌入式");
+    expect(html).not.toContain("访问统计");
+    expect(html).not.toContain("/stats");
     expect(html).not.toContain("放一些关于自己的介绍、技能方向、联系方式和当前关注的事情。");
   });
 });

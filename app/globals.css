@@ -854,6 +854,7 @@ footer {
 }
 
 .portfolio-original-thumb {
+  position: relative;
   display: grid;
   place-items: center;
   min-height: clamp(180px, 56vw, 420px);
@@ -866,6 +867,25 @@ footer {
   height: auto;
   max-height: min(72vh, 640px);
   object-fit: contain;
+}
+
+.portfolio-credit-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  max-width: calc(100% - 20px);
+  padding: 6px 10px;
+  color: var(--heading);
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .portfolio-load-more {

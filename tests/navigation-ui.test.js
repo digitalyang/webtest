@@ -14,6 +14,8 @@ describe("navigation UI", () => {
     expect(html).toContain("页面导航");
     expect(html).toContain("nav-links");
     expect(html).toContain("作品集");
+    expect(html).not.toContain("访问统计");
+    expect(html).not.toContain("/stats");
     expect(html).toContain("class=\"active\"");
   });
 

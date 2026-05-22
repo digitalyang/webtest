@@ -44,6 +44,7 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("新建角色");
     expect(html).toContain("上传图片");
     expect(html).toContain("设置封面");
+    expect(html).toContain("设置图片 CN");
     expect(html).toContain("隐藏 / 恢复");
     expect(html).toContain("作品标题");
     expect(html).toContain("作品 slug");
@@ -58,6 +59,12 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("选择封面作品");
     expect(html).toContain("选择封面角色");
     expect(html).toContain("选择封面");
+    expect(html).toContain("选择 CN 作品");
+    expect(html).toContain("选择 CN 角色");
+    expect(html).toContain("选择图片");
+    expect(html).toContain("CN 圈名");
+    expect(html).toContain("保存 CN");
+    expect(html).toContain("清空 CN");
     expect(html).toContain("上传状态");
     expect(html).toContain("上传进度");
     expect(html).toContain("0%");

@@ -39,16 +39,12 @@ describe("stats API helpers", () => {
     expect(normalizePath(`/${"a".repeat(200)}`)).toHaveLength(120);
   });
 
-  test("returns total, today, and top pages", async () => {
+  test("rejects public reads of visit records", async () => {
     const response = await handleStats(new Request("https://example.com/api/stats"), createEnv());
     const body = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(body).toEqual({
-      total: 7,
-      today: 2,
-      pages: [{ path: "/", count: 4 }]
-    });
+    expect(response.status).toBe(405);
+    expect(body.error).toBe("访问统计不公开。");
   });
 
   test("records page views with normalized data", async () => {

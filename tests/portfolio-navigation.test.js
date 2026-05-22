@@ -131,6 +131,14 @@ describe("portfolio role page", () => {
     expect(html.match(/<img/g)).toHaveLength(5);
     expect(html).toContain("Daji_1.jpeg");
     expect(html).not.toContain(".thumb.webp");
+    expect(html).not.toContain("CN：");
+  });
+
+  test("renders CN badges for credited role images", () => {
+    const html = renderRoleImages([{ src: "assets/images/HOK/Daji/Daji_1.jpeg", alt: "Daji", coserName: "小羊" }]);
+
+    expect(html).toContain("portfolio-credit-badge");
+    expect(html).toContain("CN：小羊");
   });
 
   test("marks original role images for full-content fitting", () => {

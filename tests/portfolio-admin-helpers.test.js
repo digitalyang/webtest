@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   applyStaticPortfolioExtensions,
   buildAdminPortfolioOptions,
+  buildStaticLocalImageOptions,
   buildCloudinaryCoverUrl,
   buildImageUploadPlan,
   buildStaticImageUploadPlan,
@@ -133,6 +134,27 @@ describe("portfolio admin helper functions", () => {
     expect(dynamic.photographyWorks[0].id).toBe("gbc");
     expect(dynamic.photographyWorks[0].coverThumb).toContain("nina_1.webp");
     expect(dynamic.photographyWorks[0].roles[0].images[0].src).toContain("nina_1.png");
+  });
+
+  test("merges dynamic image CN credits into public images", () => {
+    const dynamic = normalizeDynamicPortfolio({
+      works: [{ id: 10, title: "GirlsBandCry", slug: "gbc", sort_order: 1 }],
+      roles: [{ id: 20, work_id: 10, title: "Nina", slug: "nina", sort_order: 1 }],
+      images: [
+        {
+          id: 30,
+          work_id: 10,
+          role_id: 20,
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/gbc/nina/nina_1.png",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/gbc/nina/nina_1.webp",
+          alt: "GirlsBandCry Nina 1",
+          sort_order: 1
+        }
+      ],
+      imageCredits: [{ image_source: "dynamic", image_key: "30", coser_name: "Nina" }]
+    });
+
+    expect(dynamic.photographyWorks[0].roles[0].images[0].coserName).toBe("Nina");
   });
 
   test("excludes visible D1 works and roles without visible images", () => {
@@ -458,6 +480,71 @@ describe("portfolio admin helper functions", () => {
     expect(work.roles.find((role) => role.id === "girlsbandcry-subaru")).toMatchObject({
       imageCount: 1,
       images: [{ src: expect.stringContaining("subaru_1.webp"), alt: "Subaru 1" }]
+    });
+  });
+
+  test("merges static local and static appended CN credits", () => {
+    const result = applyStaticPortfolioExtensions({
+      photographyWorks: [
+        {
+          id: "girlsbandcry",
+          title: "GirlsBandCry",
+          roles: [
+            {
+              id: "girlsbandcry-nina",
+              workId: "girlsbandcry",
+              title: "Nina",
+              images: [{ src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", alt: "Nina 1" }]
+            }
+          ]
+        }
+      ]
+    }, {
+      staticImages: [
+        {
+          id: 50,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-nina",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_5.webp",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_5.webp",
+          alt: "Nina 5",
+          sort_order: 5
+        }
+      ],
+      imageCredits: [
+        { image_source: "static-local", image_key: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", coser_name: "Nina" },
+        { image_source: "static-image", image_key: "50", coser_name: "Subaru" },
+        { image_source: "static-local", image_key: "assets/images/GirlsBandCry/Nina/Nina_2.jpeg", coser_name: "佚名" }
+      ]
+    });
+
+    expect(result.photographyWorks[0].roles[0].images[0].coserName).toBe("Nina");
+    expect(result.photographyWorks[0].roles[0].images[1].coserName).toBe("Subaru");
+  });
+
+  test("builds static local image options for admin CN dropdowns", () => {
+    const options = buildStaticLocalImageOptions({
+      photographyWorks: [
+        {
+          id: "girlsbandcry",
+          title: "GirlsBandCry",
+          roles: [
+            {
+              id: "girlsbandcry-nina",
+              title: "Nina",
+              images: [{ src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", alt: "Nina 1" }]
+            }
+          ]
+        }
+      ]
+    });
+
+    expect(options[0]).toMatchObject({
+      imageSource: "static-local",
+      imageKey: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+      workId: "girlsbandcry",
+      roleId: "girlsbandcry-nina",
+      label: "Nina_1.jpeg"
     });
   });
 

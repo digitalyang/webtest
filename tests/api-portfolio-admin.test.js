@@ -8,8 +8,10 @@ import {
   handleAdminPortfolioRequest,
   handleCreateImagesRequest,
   handleImageUploadPlanRequest,
+  handleSetImageCreditRequest,
   savePortfolioImages,
   setPortfolioCover,
+  setPortfolioImageCredit,
   updatePortfolioVisibility
 } from "../lib/server/portfolio-admin.js";
 import {
@@ -311,6 +313,76 @@ describe("portfolio admin D1 helpers", () => {
       workId: 10,
       id: 20
     });
+  });
+
+  test("returns image credits and static local image options in the portfolio snapshot", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [{ image_source: "static-local", image_key: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", coser_name: "Nina" }] }
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    const cookie = await createAdminSessionCookie(env);
+
+    const response = await handleAdminPortfolioRequest(new Request("https://example.com/api/admin/portfolio", {
+      headers: { Cookie: cookie }
+    }), env, createStaticManifest());
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.imageCredits).toEqual([
+      { image_source: "static-local", image_key: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", coser_name: "Nina" }
+    ]);
+    expect(body.staticLocalImages[0]).toMatchObject({
+      imageSource: "static-local",
+      imageKey: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+      roleId: "girlsbandcry-nina"
+    });
+  });
+
+  test("sets and clears portfolio image CN credits", async () => {
+    const env = createEnv([{ success: true }, { success: true }]);
+
+    await expect(setPortfolioImageCredit(env, {
+      imageSource: "static-local",
+      imageKey: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+      coserName: "Nina"
+    })).resolves.toBeTruthy();
+    expect(env.calls[0].sql).toContain("INSERT INTO portfolio_image_credits");
+    expect(env.calls[0].values).toEqual(["static-local", "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", "Nina"]);
+
+    await expect(setPortfolioImageCredit(env, {
+      imageSource: "static-local",
+      imageKey: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+      coserName: "佚名"
+    })).resolves.toBeTruthy();
+    expect(env.calls[1].sql).toContain("DELETE FROM portfolio_image_credits");
+  });
+
+  test("protects portfolio image CN credit updates with the admin session", async () => {
+    const env = createEnv();
+    env.ADMIN_PASSWORD_HASH = await hashAdminPassword("secret");
+
+    const unauthorized = await handleSetImageCreditRequest(new Request("https://example.com/api/admin/portfolio/image-credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageSource: "dynamic", imageKey: "1", coserName: "Nina" })
+    }), env);
+    expect(unauthorized.status).toBe(401);
+
+    const cookie = await createAdminSessionCookie(env);
+    const response = await handleSetImageCreditRequest(new Request("https://example.com/api/admin/portfolio/image-credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({ imageSource: "dynamic", imageKey: "1", coserName: "Nina" })
+    }), env);
+    expect(response.status).toBe(200);
+    expect(env.calls.some((call) => call.sql?.includes("portfolio_image_credits"))).toBe(true);
   });
 });
 

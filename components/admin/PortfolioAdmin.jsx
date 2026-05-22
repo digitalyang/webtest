@@ -11,6 +11,7 @@ import {
   buildCoverPhotoOptions,
   getCoverPayload
 } from "../../lib/client/portfolio-cover-options";
+import { buildCnPhotoOptions } from "../../lib/client/portfolio-cn-options";
 
 const INITIAL_SNAPSHOT = {
   works: [],
@@ -18,8 +19,10 @@ const INITIAL_SNAPSHOT = {
   images: [],
   adminOptions: { works: [], rolesByWork: {} },
   staticImages: [],
+  staticLocalImages: [],
   staticRoles: [],
   staticCoverOverrides: [],
+  imageCredits: [],
   cloudName: "",
   uploadPreset: ""
 };
@@ -53,6 +56,10 @@ export default function PortfolioAdmin() {
   const [coverWorkKey, setCoverWorkKey] = useState("");
   const [coverRoleKey, setCoverRoleKey] = useState("");
   const [coverPhotoKey, setCoverPhotoKey] = useState("");
+  const [cnWorkKey, setCnWorkKey] = useState("");
+  const [cnRoleKey, setCnRoleKey] = useState("");
+  const [cnPhotoKey, setCnPhotoKey] = useState("");
+  const [cnCoserName, setCnCoserName] = useState("");
   const [visibilityTargetType, setVisibilityTargetType] = useState("image");
   const [visibilityTargetId, setVisibilityTargetId] = useState("");
   const [visibilityHidden, setVisibilityHidden] = useState(true);
@@ -64,6 +71,10 @@ export default function PortfolioAdmin() {
   const selectedCoverRole = coverRoleOptions.find((role) => role.value === coverRoleKey);
   const coverPhotoOptions = buildCoverPhotoOptions(selectedCoverRole, snapshot);
   const selectedCoverPhoto = coverPhotoOptions.find((photo) => photo.value === coverPhotoKey);
+  const cnRoleOptions = cnWorkKey ? snapshot.adminOptions?.rolesByWork?.[cnWorkKey] || [] : [];
+  const selectedCnRole = cnRoleOptions.find((role) => role.value === cnRoleKey);
+  const cnPhotoOptions = buildCnPhotoOptions(selectedCnRole, snapshot);
+  const selectedCnPhoto = cnPhotoOptions.find((photo) => photo.value === cnPhotoKey);
 
   async function requestJson(url, { method = "GET", body } = {}) {
     const response = await fetch(url, {
@@ -110,8 +121,10 @@ export default function PortfolioAdmin() {
       images: Array.isArray(data.images) ? data.images : [],
       adminOptions: data.adminOptions || { works: [], rolesByWork: {} },
       staticImages: Array.isArray(data.staticImages) ? data.staticImages : [],
+      staticLocalImages: Array.isArray(data.staticLocalImages) ? data.staticLocalImages : [],
       staticRoles: Array.isArray(data.staticRoles) ? data.staticRoles : [],
       staticCoverOverrides: Array.isArray(data.staticCoverOverrides) ? data.staticCoverOverrides : [],
+      imageCredits: Array.isArray(data.imageCredits) ? data.imageCredits : [],
       cloudName: data.cloudName || "",
       uploadPreset: data.uploadPreset || ""
     });
@@ -346,6 +359,28 @@ export default function PortfolioAdmin() {
     });
   }
 
+  async function setImageCredit(coserName = cnCoserName) {
+    await runAction("正在设置图片 CN...", async () => {
+      if (!selectedCnPhoto) {
+        throw new Error("请选择图片。");
+      }
+
+      await requestJson("/api/admin/portfolio/image-credits", {
+        method: "POST",
+        body: {
+          imageSource: selectedCnPhoto.imageSource,
+          imageKey: selectedCnPhoto.imageKey,
+          coserName
+        }
+      });
+      await fetchPortfolioSnapshot();
+      setCnCoserName(coserName.trim() === "佚名" ? "" : coserName.trim());
+      setStatusMessage(coserName.trim() && coserName.trim() !== "佚名"
+        ? "图片 CN 已保存，snapshot 已刷新。"
+        : "图片 CN 已清空，snapshot 已刷新。");
+    });
+  }
+
   async function hideItem(targetType = visibilityTargetType, targetId = visibilityTargetId, isHidden = visibilityHidden) {
     const endpoint = VISIBILITY_ENDPOINTS[targetType];
     if (!endpoint) {
@@ -518,6 +553,63 @@ export default function PortfolioAdmin() {
           {coverRoleKey && coverPhotoOptions.length === 0 ? <p className="form-hint">这个角色暂无可选照片。</p> : null}
           <p className="form-hint">选择作品、角色和照片后，可设置为作品封面或角色封面。</p>
           <button className="button secondary" type="button" disabled={isBusy} onClick={setCover}>设置封面</button>
+        </div>
+
+        <div className="admin-card">
+          <h2>设置图片 CN</h2>
+          <label>
+            选择 CN 作品
+            <select value={cnWorkKey} onChange={(event) => {
+              setCnWorkKey(event.target.value);
+              setCnRoleKey("");
+              setCnPhotoKey("");
+              setCnCoserName("");
+            }}>
+              <option value="">请选择作品</option>
+              {workOptions.map((work) => (
+                <option key={work.value} value={work.value}>{work.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            选择 CN 角色
+            <select value={cnRoleKey} onChange={(event) => {
+              setCnRoleKey(event.target.value);
+              setCnPhotoKey("");
+              setCnCoserName("");
+            }} disabled={!cnWorkKey}>
+              <option value="">请选择角色</option>
+              {cnRoleOptions.map((role) => (
+                <option key={role.value} value={role.value}>{role.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            选择图片
+            <select value={cnPhotoKey} onChange={(event) => {
+              const nextPhotoKey = event.target.value;
+              const nextPhoto = cnPhotoOptions.find((photo) => photo.value === nextPhotoKey);
+              setCnPhotoKey(nextPhotoKey);
+              setCnCoserName(nextPhoto?.coserName || "");
+            }} disabled={!cnRoleKey}>
+              <option value="">{cnRoleKey ? "请选择图片" : "请先选择角色"}</option>
+              {cnPhotoOptions.map((photo) => (
+                <option key={photo.value} value={photo.value}>{photo.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            CN 圈名
+            <input value={cnCoserName} onChange={(event) => setCnCoserName(event.target.value)} placeholder="留空或佚名则不显示" />
+          </label>
+          {cnRoleKey && cnPhotoOptions.length === 0 ? <p className="form-hint">这个角色暂无可设置 CN 的图片。</p> : null}
+          <p className="form-hint">未填写或填写“佚名”时，公开页面不会显示 CN 标注。</p>
+          <button className="button secondary" type="button" disabled={isBusy} onClick={() => setImageCredit()}>
+            保存 CN
+          </button>
+          <button className="button secondary" type="button" disabled={isBusy} onClick={() => setImageCredit("")}>
+            清空 CN
+          </button>
         </div>
 
         <div className="admin-card">

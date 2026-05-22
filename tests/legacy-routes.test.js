@@ -11,6 +11,7 @@ describe("legacy route redirects", () => {
     expect(getLegacyRedirectPath(new URL("https://example.com/pages/portfolio-role.html?id=hok-daji"))).toBe(
       "/portfolio/role/hok-daji"
     );
+    expect(getLegacyRedirectPath(new URL("https://example.com/pages/stats.html"))).toBeUndefined();
   });
 
   test("leaves non-legacy paths alone", () => {

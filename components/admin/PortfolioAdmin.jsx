@@ -7,6 +7,10 @@ import {
   fileNeedsCompression,
   prepareImageForUpload
 } from "../../lib/client/image-compression";
+import {
+  buildCoverPhotoOptions,
+  getCoverPayload
+} from "../../lib/client/portfolio-cover-options";
 
 const INITIAL_SNAPSHOT = {
   works: [],
@@ -46,14 +50,20 @@ export default function PortfolioAdmin() {
   const [selectedRoleKey, setSelectedRoleKey] = useState("");
   const [uploadFiles, setUploadFiles] = useState([]);
   const [coverTargetType, setCoverTargetType] = useState("role");
-  const [coverTargetId, setCoverTargetId] = useState("");
-  const [coverImageId, setCoverImageId] = useState("");
+  const [coverWorkKey, setCoverWorkKey] = useState("");
+  const [coverRoleKey, setCoverRoleKey] = useState("");
+  const [coverPhotoKey, setCoverPhotoKey] = useState("");
   const [visibilityTargetType, setVisibilityTargetType] = useState("image");
   const [visibilityTargetId, setVisibilityTargetId] = useState("");
   const [visibilityHidden, setVisibilityHidden] = useState(true);
   const workOptions = snapshot.adminOptions?.works || [];
   const roleOptions = selectedWorkKey ? snapshot.adminOptions?.rolesByWork?.[selectedWorkKey] || [] : [];
   const selectedRole = roleOptions.find((role) => role.value === selectedRoleKey);
+  const coverRoleOptions = coverWorkKey ? snapshot.adminOptions?.rolesByWork?.[coverWorkKey] || [] : [];
+  const selectedCoverWork = workOptions.find((work) => work.value === coverWorkKey);
+  const selectedCoverRole = coverRoleOptions.find((role) => role.value === coverRoleKey);
+  const coverPhotoOptions = buildCoverPhotoOptions(selectedCoverRole, snapshot);
+  const selectedCoverPhoto = coverPhotoOptions.find((photo) => photo.value === coverPhotoKey);
 
   async function requestJson(url, { method = "GET", body } = {}) {
     const response = await fetch(url, {
@@ -323,9 +333,15 @@ export default function PortfolioAdmin() {
     await runAction("正在设置封面...", async () => {
       await requestJson("/api/admin/portfolio/covers", {
         method: "POST",
-        body: { targetType: coverTargetType, targetId: coverTargetId, imageId: coverImageId }
+        body: getCoverPayload({
+          coverTargetType,
+          selectedCoverWork,
+          selectedCoverRole,
+          selectedCoverPhoto
+        })
       });
       await fetchPortfolioSnapshot();
+      setCoverPhotoKey("");
       setStatusMessage("封面已更新，snapshot 已刷新。");
     });
   }
@@ -456,23 +472,51 @@ export default function PortfolioAdmin() {
         <div className="admin-card">
           <h2>设置封面</h2>
           <label>
-            目标类型
-            <select value={coverTargetType} onChange={(event) => setCoverTargetType(event.target.value)}>
-              <option value="role">角色</option>
-              <option value="work">作品</option>
-              <option value="static-role">旧相册</option>
-              <option value="static-work">旧作品</option>
+            封面类型
+            <select value={coverTargetType} onChange={(event) => {
+              setCoverTargetType(event.target.value);
+              setCoverPhotoKey("");
+            }}>
+              <option value="work">作品封面</option>
+              <option value="role">角色封面</option>
             </select>
           </label>
           <label>
-            目标 ID
-            <input value={coverTargetId} onChange={(event) => setCoverTargetId(event.target.value)} placeholder="1" />
+            选择封面作品
+            <select value={coverWorkKey} onChange={(event) => {
+              setCoverWorkKey(event.target.value);
+              setCoverRoleKey("");
+              setCoverPhotoKey("");
+            }}>
+              <option value="">请选择作品</option>
+              {workOptions.map((work) => (
+                <option key={work.value} value={work.value}>{work.label}</option>
+              ))}
+            </select>
           </label>
           <label>
-            图片 ID
-            <input value={coverImageId} onChange={(event) => setCoverImageId(event.target.value)} placeholder="1" />
+            选择封面角色
+            <select value={coverRoleKey} onChange={(event) => {
+              setCoverRoleKey(event.target.value);
+              setCoverPhotoKey("");
+            }} disabled={!coverWorkKey}>
+              <option value="">请选择角色</option>
+              {coverRoleOptions.map((role) => (
+                <option key={role.value} value={role.value}>{role.label}</option>
+              ))}
+            </select>
           </label>
-          <p className="form-hint">动态作品/角色使用数字 ID；旧作品/旧相册使用字符串 ID，图片 ID 使用下方“追加图片 snapshot”的 ID。封面使用 Cloudinary 480px WebP。</p>
+          <label>
+            选择封面
+            <select value={coverPhotoKey} onChange={(event) => setCoverPhotoKey(event.target.value)} disabled={!coverRoleKey}>
+              <option value="">{coverRoleKey ? "请选择封面" : "请先选择角色"}</option>
+              {coverPhotoOptions.map((photo) => (
+                <option key={photo.value} value={photo.value}>{photo.label}</option>
+              ))}
+            </select>
+          </label>
+          {coverRoleKey && coverPhotoOptions.length === 0 ? <p className="form-hint">这个角色暂无可选照片。</p> : null}
+          <p className="form-hint">选择作品、角色和照片后，可设置为作品封面或角色封面。</p>
           <button className="button secondary" type="button" disabled={isBusy} onClick={setCover}>设置封面</button>
         </div>
 
@@ -488,7 +532,7 @@ export default function PortfolioAdmin() {
             </select>
           </label>
           <label>
-            目标 ID
+            对象标识
             <input value={visibilityTargetId} onChange={(event) => setVisibilityTargetId(event.target.value)} placeholder="1" />
           </label>
           <label>

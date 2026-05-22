@@ -178,15 +178,90 @@ describe("portfolio admin D1 helpers", () => {
   });
 
   test("sets covers and visibility flags", async () => {
-    const env = createEnv([{ success: true }, { success: true }]);
+    const env = createEnv([
+      {
+        id: 9,
+        cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
+        cover_thumb_url: "thumb.webp",
+        work_id: 1,
+        role_id: 2
+      },
+      { success: true },
+      { success: true }
+    ]);
 
     await setPortfolioCover(env, { targetType: "role", targetId: 2, imageId: 9 });
-    expect(env.calls[0].sql).toContain("UPDATE portfolio_roles");
-    expect(env.calls[0].values).toEqual([9, 2]);
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_roles");
+    expect(env.calls[1].values).toEqual([9, 2]);
 
     await updatePortfolioVisibility(env, { targetType: "image", targetId: 9, isHidden: true });
-    expect(env.calls[1].sql).toContain("UPDATE portfolio_images");
-    expect(env.calls[1].values).toEqual([1, 9]);
+    expect(env.calls[2].sql).toContain("UPDATE portfolio_images");
+    expect(env.calls[2].values).toEqual([1, 9]);
+  });
+
+  test("derives missing dynamic cover thumbnails before setting covers", async () => {
+    const env = createEnv([
+      {
+        id: 20,
+        cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
+        cover_thumb_url: "",
+        work_id: 1,
+        role_id: 2
+      },
+      { success: true },
+      { success: true }
+    ]);
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+
+    await expect(setPortfolioCover(env, { targetType: "role", targetId: 2, imageId: 20 })).resolves.toBeTruthy();
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_images SET cover_thumb_url");
+    expect(env.calls[1].values[0]).toContain("c_fill,w_480,f_webp,q_auto");
+    expect(env.calls[2].sql).toContain("UPDATE portfolio_roles SET cover_image_id");
+  });
+
+  test("rejects dynamic role covers from other roles", async () => {
+    const env = createEnv([
+      {
+        id: 20,
+        cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
+        cover_thumb_url: "thumb.webp",
+        work_id: 1,
+        role_id: 3
+      }
+    ]);
+
+    await expect(setPortfolioCover(env, { targetType: "role", targetId: 2, imageId: 20 }))
+      .rejects.toThrow("动态封面图片无效。");
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_roles"))).toBe(false);
+  });
+
+  test("rejects dynamic work covers from other works", async () => {
+    const env = createEnv([
+      {
+        id: 20,
+        cloudinary_public_id: "webtest/portfolio/gbc/nina/nina_1",
+        cover_thumb_url: "thumb.webp",
+        work_id: 2,
+        role_id: 3
+      }
+    ]);
+
+    await expect(setPortfolioCover(env, { targetType: "work", targetId: 1, imageId: 20 }))
+      .rejects.toThrow("动态封面图片无效。");
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_works"))).toBe(false);
+  });
+
+  test("rejects dynamic covers when the image is missing", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(setPortfolioCover(env, { targetType: "role", targetId: 2, imageId: 20 }))
+      .rejects.toThrow("动态封面图片无效。");
+    expect(env.calls[0].sql).toContain("SELECT");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_roles"))).toBe(false);
   });
 
   test("loads dynamic portfolio rows", async () => {
@@ -471,7 +546,13 @@ describe("portfolio admin API request validation", () => {
   test("sets static portfolio cover overrides", async () => {
     const hash = await hashAdminPassword("secret");
     const env = createEnv([
-      { id: 50, static_work_id: "girlsbandcry", static_role_id: "girlsbandcry-nina" },
+      {
+        id: 50,
+        static_work_id: "girlsbandcry",
+        static_role_id: "girlsbandcry-nina",
+        cloudinary_public_id: "webtest/portfolio/girlsbandcry/nina/nina_5",
+        cover_thumb_url: "thumb.webp"
+      },
       { success: true }
     ]);
     env.ADMIN_PASSWORD_HASH = hash;
@@ -493,6 +574,39 @@ describe("portfolio admin API request validation", () => {
     expect(env.calls[0].values).toEqual([50]);
     expect(env.calls[1].sql).toContain("portfolio_static_cover_overrides");
     expect(env.calls[1].values).toEqual(["role", "girlsbandcry-nina", 50]);
+  });
+
+  test("derives missing static cover thumbnails before setting covers", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([
+      {
+        id: 50,
+        static_work_id: "girlsbandcry",
+        static_role_id: "girlsbandcry-nina",
+        cloudinary_public_id: "webtest/portfolio/girlsbandcry/nina/nina_5",
+        cover_thumb_url: ""
+      },
+      { success: true },
+      { success: true }
+    ]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    env.CLOUDINARY_CLOUD_NAME = "di76171b0";
+    sessionRouteContext.env = env;
+    const cookie = await createAdminSessionCookie(env);
+    const { POST } = await import("../app/api/admin/portfolio/covers/route.js");
+    const response = await POST(new Request("https://example.com/api/admin/portfolio/covers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({
+        targetType: "static-role",
+        targetId: "girlsbandcry-nina",
+        imageId: 50
+      })
+    }));
+
+    expect(response.status).toBe(200);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_images SET cover_thumb_url");
+    expect(env.calls[1].values[0]).toContain("c_fill,w_480,f_webp,q_auto");
   });
 
   test("hides static appended images through the image route", async () => {

@@ -296,8 +296,8 @@ describe("portfolio admin helper functions", () => {
               workId: "girlsbandcry",
               title: "Nina",
               coverThumb: "old-role.webp",
-              imageCount: 1,
-              images: [{ src: "nina_1.jpeg", alt: "Nina 1" }]
+              imageCount: 0,
+              images: []
             }
           ]
         }
@@ -306,6 +306,16 @@ describe("portfolio admin helper functions", () => {
 
     const result = applyStaticPortfolioExtensions(manifest, {
       staticImages: [
+        {
+          id: 8,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-nina",
+          legacy_local_src: "nina_1.jpeg",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_1.webp",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_1.webp",
+          alt: "Nina 1",
+          sort_order: 1
+        },
         {
           id: 9,
           static_work_id: "girlsbandcry",
@@ -416,19 +426,23 @@ describe("portfolio admin helper functions", () => {
               workId: "girlsbandcry",
               title: "Nina",
               coverThumb: "old-role-cover.webp",
-              imageCount: 4,
-              images: [
-                { src: "nina_1.jpeg", alt: "Nina 1" },
-                { src: "nina_2.jpeg", alt: "Nina 2" },
-                { src: "nina_3.jpeg", alt: "Nina 3" },
-                { src: "nina_4.jpeg", alt: "Nina 4" }
-              ]
+              imageCount: 0,
+              images: []
             }
           ]
         }
       ]
     }, {
       staticImages: [
+        ...[1, 2, 3, 4].map((index) => ({
+          id: 40 + index,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-nina",
+          secure_url: `https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_${index}.webp`,
+          cover_thumb_url: `https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_${index}.webp`,
+          alt: `Nina ${index}`,
+          sort_order: index
+        })),
         {
           id: 50,
           static_work_id: "girlsbandcry",
@@ -483,7 +497,7 @@ describe("portfolio admin helper functions", () => {
     });
   });
 
-  test("merges static local and static appended CN credits", () => {
+  test("merges migrated and appended static-image CN credits", () => {
     const result = applyStaticPortfolioExtensions({
       photographyWorks: [
         {
@@ -494,13 +508,23 @@ describe("portfolio admin helper functions", () => {
               id: "girlsbandcry-nina",
               workId: "girlsbandcry",
               title: "Nina",
-              images: [{ src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", alt: "Nina 1" }]
+              images: []
             }
           ]
         }
       ]
     }, {
       staticImages: [
+        {
+          id: 49,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-nina",
+          legacy_local_src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+          secure_url: "https://res.cloudinary.com/di76171b0/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_1.webp",
+          cover_thumb_url: "https://res.cloudinary.com/di76171b0/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_1.webp",
+          alt: "Nina 1",
+          sort_order: 1
+        },
         {
           id: 50,
           static_work_id: "girlsbandcry",
@@ -512,9 +536,8 @@ describe("portfolio admin helper functions", () => {
         }
       ],
       imageCredits: [
-        { image_source: "static-local", image_key: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", coser_name: "Nina" },
-        { image_source: "static-image", image_key: "50", coser_name: "Subaru" },
-        { image_source: "static-local", image_key: "assets/images/GirlsBandCry/Nina/Nina_2.jpeg", coser_name: "佚名" }
+        { image_source: "static-image", image_key: "49", coser_name: "Nina" },
+        { image_source: "static-image", image_key: "50", coser_name: "Subaru" }
       ]
     });
 
@@ -593,8 +616,54 @@ describe("portfolio admin helper functions", () => {
 
     const role = result.photographyWorks[0].roles[0];
     expect(role.coverThumb).toContain("portfolio-covers/girlsbandcry/nina/nina_1.webp");
-    expect(role.imageCount).toBe(1);
-    expect(role.images).toEqual([{ src: "nina_1.jpeg", alt: "Nina 1" }]);
+    expect(role.imageCount).toBe(0);
+    expect(role.images).toEqual([]);
+  });
+
+  test("applyStaticPortfolioExtensions serves manifest roles from D1 cloud urls only", () => {
+    const manifest = {
+      photographyWorks: [
+        {
+          id: "girlsbandcry",
+          title: "GirlsBandCry",
+          coverThumb: "assets/images/GirlsBandCry/Nina/Nina_1.thumb.webp",
+          roles: [
+            {
+              id: "girlsbandcry-nina",
+              title: "Nina",
+              coverThumb: "assets/images/GirlsBandCry/Nina/Nina_1.thumb.webp",
+              images: [{ src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg", alt: "local" }]
+            }
+          ]
+        }
+      ]
+    };
+
+    const merged = applyStaticPortfolioExtensions(manifest, {
+      staticImages: [
+        {
+          id: 10,
+          static_work_id: "girlsbandcry",
+          static_role_id: "girlsbandcry-nina",
+          legacy_local_src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+          cloudinary_public_id: "webtest/portfolio/girlsbandcry/nina/nina_1",
+          secure_url: "https://res.cloudinary.com/demo/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_1.jpg",
+          cover_thumb_url: "https://res.cloudinary.com/demo/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_1.webp",
+          filename: "Nina_1.jpeg",
+          alt: "cloud",
+          sort_order: 1,
+          is_hidden: 0
+        }
+      ],
+      staticRoles: [],
+      coverOverrides: [],
+      imageCredits: []
+    });
+
+    const role = merged.photographyWorks[0].roles[0];
+    expect(role.images[0].src).toContain("res.cloudinary.com");
+    expect(role.images[0].src).not.toContain("assets/images/");
+    expect(role.coverThumb).toContain("res.cloudinary.com");
   });
 
   test("builds admin dropdown options without exposing source labels", () => {

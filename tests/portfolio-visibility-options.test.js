@@ -193,13 +193,17 @@ describe("portfolio visibility options", () => {
     expect(() => getVisibilityPayload({ targetType: "bad", isHidden: true })).toThrow("隐藏目标类型无效。");
   });
 
-  test("rejects direct static manifest role visibility", () => {
-    expect(() => getVisibilityPayload({
+  test("maps static manifest role visibility to static-manifest-role", () => {
+    expect(getVisibilityPayload({
       targetType: "role",
       workKey: "static:static-work",
       roleKey: "static-manifest:static-work-local",
       isHidden: true
-    })).toThrow("该静态角色不能直接隐藏，请选择追加图片或追加角色。");
+    })).toEqual({
+      targetType: "static-manifest-role",
+      targetId: "static-work-local",
+      isHidden: true
+    });
   });
 
   test("rejects stale target type and option source combinations", () => {

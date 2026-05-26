@@ -7,6 +7,7 @@ import { afterEach, describe, expect, test } from "vitest";
 const require = createRequire(import.meta.url);
 const {
   buildCoverThumbUrl,
+  buildCreditsMigrationSql,
   buildImportRecords,
   buildUpsertSql,
   parseDotVars
@@ -60,9 +61,10 @@ describe("buildImportRecords", () => {
       {
         staticWorkId: "girlsbandcry",
         staticRoleId: "girlsbandcry-nina",
-        publicId: "webtest/portfolio-covers/girlsbandcry/nina/nina_1",
-        secureUrl: "https://res.cloudinary.com/demo/image/upload/v1/webtest/portfolio-covers/girlsbandcry/nina/nina_1.webp",
-        coverThumbUrl: "https://res.cloudinary.com/demo/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio-covers/girlsbandcry/nina/nina_1.webp",
+        publicId: "webtest/portfolio/girlsbandcry/nina/nina_1",
+        legacyLocalSrc: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+        secureUrl: "https://res.cloudinary.com/demo/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_1.jpg",
+        coverThumbUrl: "https://res.cloudinary.com/demo/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_1.webp",
         filename: "Nina_1.jpeg",
         alt: "GirlsBandCry Nina 1",
         width: null,
@@ -75,9 +77,10 @@ describe("buildImportRecords", () => {
       {
         staticWorkId: "girlsbandcry",
         staticRoleId: "girlsbandcry-nina",
-        publicId: "webtest/portfolio-covers/girlsbandcry/nina/nina_2",
-        secureUrl: "https://res.cloudinary.com/demo/image/upload/v1/webtest/portfolio-covers/girlsbandcry/nina/nina_2.webp",
-        coverThumbUrl: "https://res.cloudinary.com/demo/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio-covers/girlsbandcry/nina/nina_2.webp",
+        publicId: "webtest/portfolio/girlsbandcry/nina/nina_2",
+        legacyLocalSrc: "assets/images/GirlsBandCry/Nina/Nina_2.png",
+        secureUrl: "https://res.cloudinary.com/demo/image/upload/v1/webtest/portfolio/girlsbandcry/nina/nina_2.png",
+        coverThumbUrl: "https://res.cloudinary.com/demo/image/upload/c_fill,w_480,f_webp,q_auto/webtest/portfolio/girlsbandcry/nina/nina_2.webp",
         filename: "Nina_2.png",
         alt: "GirlsBandCry Nina 2",
         width: null,
@@ -130,6 +133,7 @@ describe("buildUpsertSql", () => {
         staticWorkId: "fgo",
         staticRoleId: "fgo-nero",
         publicId: "webtest/portfolio/fgo/nero/nero_1",
+        legacyLocalSrc: "assets/images/FGO/Nero/Nero_1.jpeg",
         secureUrl: "https://example.com/nero_1.jpeg",
         coverThumbUrl: "https://example.com/nero_1.webp",
         filename: "Nero_1.jpeg",
@@ -143,11 +147,27 @@ describe("buildUpsertSql", () => {
     ]);
 
     expect(sql).toContain("INSERT INTO portfolio_static_images");
+    expect(sql).toContain("legacy_local_src");
+    expect(sql).toContain("assets/images/FGO/Nero/Nero_1.jpeg");
     expect(sql).toContain("ON CONFLICT(cloudinary_public_id) DO UPDATE SET");
     expect(sql).toContain("'webtest/portfolio/fgo/nero/nero_1'");
+    expect(sql).toContain("UPDATE portfolio_image_credits");
     expect(sql).not.toContain("BEGIN TRANSACTION");
     expect(sql).not.toContain("COMMIT");
     expect(sql).not.toContain("SAVEPOINT");
+  });
+});
+
+describe("buildCreditsMigrationSql", () => {
+  test("rewrites static-local credits to static-image ids", () => {
+    const sql = buildCreditsMigrationSql([
+      {
+        legacyLocalSrc: "assets/images/FGO/Nero/Nero_1.jpeg"
+      }
+    ]);
+
+    expect(sql).toContain("image_source = 'static-image'");
+    expect(sql).toContain("assets/images/FGO/Nero/Nero_1.jpeg");
   });
 });
 

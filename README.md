@@ -55,7 +55,7 @@ npm run generate:portfolio-thumbs
 npm run generate:portfolio
 ```
 
-导入旧静态作品的 Cloudinary 封面候选：
+导入 `portfolio.json` 中的静态原图到 Cloudinary 画廊（与追加上传相同的 9.5MB 压缩策略）：
 
 ```sh
 npm run import:static-portfolio:dry-run
@@ -63,7 +63,9 @@ npm run import:static-portfolio:local
 npm run import:static-portfolio:remote
 ```
 
-导入脚本只上传 480px WebP 封面候选到 `webtest/portfolio-covers/...`，不会上传完整静态大图。远程导入前建议先运行 dry-run 确认将处理的图片列表。
+脚本会上传完整画廊资源到 `webtest/portfolio/{作品}/{角色}/{角色}_{序号}`，写入 D1 `portfolio_static_images`（含 `legacy_local_src`），并迁移 `static-local` 出镜名记录。远程导入前建议先运行 dry-run 确认将处理的图片列表。
+
+部署后公开作品集只使用 Cloudinary URL；`public/assets/images` 仍保留在仓库中作备份，站点运行时不再引用本地路径。本地调试如需回退 manifest 原图，可设置 `ALLOW_LOCAL_STATIC_FALLBACK=1`。
 
 生产构建并生成 OpenNext Cloudflare 产物：
 

@@ -4,11 +4,9 @@ const childProcess = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const sharp = require("sharp");
 
 const DEFAULT_DATABASE_NAME = "webtest-db";
-const COVER_PUBLIC_ID_PREFIX = "webtest/portfolio-covers";
-const COVER_WIDTH = 480;
+const GALLERY_PUBLIC_ID_PREFIX = "webtest/portfolio";
 
 function parseDotVars(contents = "") {
   const values = {};
@@ -28,6 +26,14 @@ function parseDotVars(contents = "") {
 
 function buildCoverThumbUrl(cloudName, publicId) {
   return `https://res.cloudinary.com/${cloudName}/image/upload/c_fill,w_480,f_webp,q_auto/${publicId}.webp`;
+}
+
+function buildGalleryPublicId(staticWorkId, roleSlug, sortOrder) {
+  return `${GALLERY_PUBLIC_ID_PREFIX}/${staticWorkId}/${roleSlug}/${roleSlug}_${sortOrder}`;
+}
+
+function buildGallerySourceUrl(cloudName, publicId, format = "webp") {
+  return `https://res.cloudinary.com/${cloudName}/image/upload/v1/${publicId}.${format}`;
 }
 
 function buildImportRecords({ manifest, rootDir, cloudName, skipMissing = false }) {
@@ -59,13 +65,15 @@ function buildImportRecords({ manifest, rootDir, cloudName, skipMissing = false 
 
         const sortOrder = index + 1;
         const filename = path.basename(src);
-        const publicId = `${COVER_PUBLIC_ID_PREFIX}/${staticWorkId}/${roleSlug}/${roleSlug}_${sortOrder}`;
+        const publicId = buildGalleryPublicId(staticWorkId, roleSlug, sortOrder);
+        const placeholderFormat = deliveryExtension(filename) === "png" ? "png" : deliveryExtension(filename) === "webp" ? "webp" : "jpg";
 
         records.push({
           staticWorkId,
           staticRoleId,
           publicId,
-          secureUrl: buildCoverSourceUrl(cloudName, publicId),
+          legacyLocalSrc: src,
+          secureUrl: buildGallerySourceUrl(cloudName, publicId, placeholderFormat),
           coverThumbUrl: buildCoverThumbUrl(cloudName, publicId),
           filename,
           alt: image?.alt || `${work?.title || staticWorkId} ${role?.title || roleSlug} ${sortOrder}`,
@@ -108,7 +116,8 @@ function buildUpsertSql(records = []) {
   height,
   format,
   bytes,
-  sort_order
+  sort_order,
+  legacy_local_src
 ) VALUES (
   ${sqlValue(record.staticWorkId)},
   ${sqlValue(record.staticRoleId)},
@@ -121,7 +130,8 @@ function buildUpsertSql(records = []) {
   ${sqlValue(record.height)},
   ${sqlValue(record.format)},
   ${sqlValue(record.bytes)},
-  ${sqlValue(record.sortOrder)}
+  ${sqlValue(record.sortOrder)},
+  ${sqlValue(record.legacyLocalSrc)}
 )
 ON CONFLICT(cloudinary_public_id) DO UPDATE SET
   static_work_id = excluded.static_work_id,
@@ -135,9 +145,34 @@ ON CONFLICT(cloudinary_public_id) DO UPDATE SET
   format = excluded.format,
   bytes = excluded.bytes,
   sort_order = excluded.sort_order,
+  legacy_local_src = excluded.legacy_local_src,
   updated_at = CURRENT_TIMESTAMP;`);
 
-  return [...statements, ""].join("\n");
+  return [...statements, buildCreditsMigrationSql(records), ""].join("\n");
+}
+
+function buildCreditsMigrationSql(records = []) {
+  const statements = records
+    .filter((record) => record.legacyLocalSrc)
+    .map(
+      (record) => `UPDATE portfolio_image_credits
+SET image_source = 'static-image',
+    image_key = (
+      SELECT CAST(id AS TEXT)
+      FROM portfolio_static_images
+      WHERE legacy_local_src = ${sqlValue(record.legacyLocalSrc)}
+      LIMIT 1
+    ),
+    updated_at = CURRENT_TIMESTAMP
+WHERE image_source = 'static-local'
+  AND image_key = ${sqlValue(record.legacyLocalSrc)};`
+    );
+
+  if (statements.length === 0) {
+    return "-- No static-local credits to migrate.\n";
+  }
+
+  return statements.join("\n");
 }
 
 function parseArgs(argv = process.argv.slice(2)) {
@@ -216,10 +251,11 @@ async function main() {
     throw new Error("CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET are required for real imports.");
   }
 
+  const { prepareLocalImageForUpload } = await import("../lib/portfolio-image-processing.js");
   const uploadedRecords = [];
   for (const [index, record] of records.entries()) {
     console.log(`Uploading ${index + 1}/${records.length}: ${record.publicId}`);
-    uploadedRecords.push(await uploadRecord(record, { cloudName, uploadPreset }));
+    uploadedRecords.push(await uploadRecord(record, { cloudName, uploadPreset, prepareLocalImageForUpload }));
   }
 
   const sql = buildUpsertSql(uploadedRecords);
@@ -231,8 +267,8 @@ async function main() {
   console.log(`Imported ${uploadedRecords.length} static portfolio images into ${options.remote ? "remote" : "local"} D1.`);
 }
 
-async function uploadRecord(record, { cloudName, uploadPreset }) {
-  const response = await uploadToCloudinary(record, { cloudName, uploadPreset });
+async function uploadRecord(record, { cloudName, uploadPreset, prepareLocalImageForUpload }) {
+  const response = await uploadToCloudinary(record, { cloudName, uploadPreset, prepareLocalImageForUpload });
 
   return {
     ...record,
@@ -244,10 +280,10 @@ async function uploadRecord(record, { cloudName, uploadPreset }) {
   };
 }
 
-async function uploadToCloudinary(record, { cloudName, uploadPreset }) {
+async function uploadToCloudinary(record, { cloudName, uploadPreset, prepareLocalImageForUpload }) {
+  const prepared = await prepareLocalImageForUpload(record.localPath);
   const formData = new FormData();
-  const buffer = await buildCoverUploadBuffer(record.localPath);
-  formData.append("file", new Blob([buffer], { type: "image/webp" }), coverUploadFilename(record.filename));
+  formData.append("file", new Blob([prepared.buffer], { type: prepared.mimeType }), prepared.filename);
   formData.append("upload_preset", uploadPreset);
   formData.append("public_id", record.publicId);
 
@@ -347,34 +383,9 @@ function getRoleSlug(staticWorkId, role) {
   return slug(role?.title || roleId);
 }
 
-async function buildCoverUploadBuffer(localPath) {
-  return sharp(localPath)
-    .rotate()
-    .resize({ width: COVER_WIDTH, withoutEnlargement: true })
-    .webp({ quality: 78 })
-    .toBuffer();
-}
-
-function coverUploadFilename(filename) {
-  return `${path.parse(filename).name}.cover.webp`;
-}
-
-function buildCoverSourceUrl(cloudName, publicId) {
-  return `https://res.cloudinary.com/${cloudName}/image/upload/v1/${publicId}.webp`;
-}
-
 function deliveryExtension(filename) {
   const extension = path.extname(filename).slice(1).toLowerCase();
   return extension || "jpg";
-}
-
-function mimeTypeFor(filename) {
-  const extension = deliveryExtension(filename);
-  if (extension === "jpg" || extension === "jpeg") return "image/jpeg";
-  if (extension === "png") return "image/png";
-  if (extension === "webp") return "image/webp";
-  if (extension === "gif") return "image/gif";
-  return "application/octet-stream";
 }
 
 function sqlValue(value) {
@@ -427,9 +438,10 @@ if (require.main === module) {
 
 module.exports = {
   buildCoverThumbUrl,
+  buildGalleryPublicId,
   buildImportRecords,
   buildUpsertSql,
-  buildCoverUploadBuffer,
+  buildCreditsMigrationSql,
   parseArgs,
   parseDotVars
 };

@@ -26,24 +26,44 @@ describe("portfolio CN image options", () => {
     ]);
   });
 
-  test("combines static local and static appended images by selected role", () => {
+  test("lists static gallery images by selected role", () => {
     const options = buildCnPhotoOptions({ workSource: "static", id: "girlsbandcry-nina" }, {
-      staticLocalImages: [
-        {
-          imageKey: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
-          roleId: "girlsbandcry-nina",
-          label: "Nina_1.jpeg"
-        }
-      ],
       staticImages: [
+        {
+          id: 49,
+          static_role_id: "girlsbandcry-nina",
+          legacy_local_src: "assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+          filename: "Nina_1.jpeg"
+        },
         { id: 50, static_role_id: "girlsbandcry-nina", filename: "nina_5.webp" }
       ]
     });
 
     expect(options.map((option) => option.value)).toEqual([
-      "static-local:assets/images/GirlsBandCry/Nina/Nina_1.jpeg",
+      "static-image:49",
       "static-image:50"
     ]);
+  });
+
+  test("excludes static cover-only rows from CN options", () => {
+    const options = buildCnPhotoOptions({ workSource: "static", id: "girlsbandcry-nina" }, {
+      staticImages: [
+        {
+          id: 70,
+          static_role_id: "girlsbandcry-nina",
+          cloudinary_public_id: "webtest/portfolio-covers/girlsbandcry/nina/nina_1",
+          filename: "Nina_1.jpeg"
+        },
+        {
+          id: 49,
+          static_role_id: "girlsbandcry-nina",
+          filename: "Nina_1.jpeg"
+        }
+      ]
+    });
+
+    expect(options).toHaveLength(1);
+    expect(options[0].value).toBe("static-image:49");
   });
 
   test("treats anonymous CN credits as empty", () => {

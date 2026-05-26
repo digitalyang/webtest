@@ -368,6 +368,21 @@ describe("portfolio admin D1 helpers", () => {
     expect(env.calls[1].values).toEqual([0, 50]);
   });
 
+  test("hides all migrated manifest images when hiding a static manifest role", async () => {
+    const env = createEnv([{ success: true }]);
+
+    await expect(updatePortfolioVisibility(env, {
+      targetType: "static-manifest-role",
+      targetId: "girlsbandcry-nina",
+      isHidden: true
+    })).resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[0].sql).toContain("WHERE static_role_id = ?");
+    expect(env.calls[0].values).toEqual([1, "girlsbandcry-nina"]);
+  });
+
   test("rejects invalid visibility ids before writing", async () => {
     const env = createEnv();
 

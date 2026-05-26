@@ -35,7 +35,7 @@ export default async function PortfolioRolePage({ params }) {
         <section className="hero">
           <div className="badge">Portfolio</div>
           <h1>角色图片</h1>
-          <p className="subtitle">原图每次加载 5 张。</p>
+          <p className="subtitle">每次加载 5 张图片。</p>
         </section>
         <div className="portfolio-app" aria-live="polite">
           <p className="muted">没有找到这个角色。</p>
@@ -57,7 +57,7 @@ export default async function PortfolioRolePage({ params }) {
         <h1>
           {work.title} · {role.title}
         </h1>
-        <p className="subtitle">{images.length} 张原图，每次加载 5 张。</p>
+        <p className="subtitle">{images.length} 张图片，每次加载 5 张。</p>
       </section>
 
       <div className="portfolio-app" aria-live="polite">

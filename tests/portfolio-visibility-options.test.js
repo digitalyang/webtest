@@ -141,21 +141,44 @@ describe("portfolio visibility options", () => {
     expect(options.filter((option) => option.value === "static-role:20")).toHaveLength(1);
   });
 
-  test("builds dynamic and appended image options for selected roles", () => {
-    expect(buildVisibilityImageOptions(snapshot, "image", "dynamic:10")).toEqual([
+  test("builds dynamic and static gallery image options for selected roles", () => {
+    expect(buildVisibilityImageOptions(snapshot, "dynamic:10")).toEqual([
       { source: "dynamic", id: 100, value: "dynamic:100", label: "nina_1.webp" },
       { source: "dynamic", id: 101, value: "dynamic:101", label: "webtest/portfolio/girlsbandcry/nina/nina_2（隐藏）" }
     ]);
 
-    expect(buildVisibilityImageOptions(snapshot, "static-image", "static-manifest:static-work-append")).toEqual([
+    expect(buildVisibilityImageOptions(snapshot, "static-manifest:static-work-append")).toEqual([
       { source: "static", id: 200, value: "static:200", label: "append_1.webp" }
     ]);
   });
 
-  test("resolves appended image options from static role row selections", () => {
-    expect(buildVisibilityImageOptions(snapshot, "static-image", "static-role:20")).toEqual([
+  test("resolves static gallery image options from static role row selections", () => {
+    expect(buildVisibilityImageOptions(snapshot, "static-role:20")).toEqual([
       { source: "static", id: 200, value: "static:200", label: "append_1.webp" }
     ]);
+  });
+
+  test("excludes portfolio-covers rows from static image options", () => {
+    const dupSnapshot = {
+      ...snapshot,
+      staticImages: [
+        {
+          id: 200,
+          static_role_id: "static-work-append",
+          filename: "append_1.webp",
+          cloudinary_public_id: "webtest/portfolio/fate/tamamo/append_1"
+        },
+        {
+          id: 201,
+          static_role_id: "static-work-append",
+          filename: "append_1.webp",
+          cloudinary_public_id: "webtest/portfolio-covers/fate/tamamo/append_1"
+        }
+      ]
+    };
+    const options = buildVisibilityImageOptions(dupSnapshot, "static-manifest:static-work-append");
+    expect(options).toHaveLength(1);
+    expect(options[0].id).toBe(200);
   });
 
   test("maps selected values to visibility payloads", () => {
@@ -179,7 +202,7 @@ describe("portfolio visibility options", () => {
       targetId: 100,
       isHidden: true
     });
-    expect(getVisibilityPayload({ targetType: "static-image", workKey: "static:static-work", roleKey: "static-manifest:static-work-append", imageKey: "static:200", isHidden: true })).toEqual({
+    expect(getVisibilityPayload({ targetType: "image", workKey: "static:static-work", roleKey: "static-manifest:static-work-append", imageKey: "static:200", isHidden: true })).toEqual({
       targetType: "static-image",
       targetId: "static:200",
       isHidden: true
@@ -229,10 +252,10 @@ describe("portfolio visibility options", () => {
     })).toThrow("隐藏目标类型无效。");
 
     expect(() => getVisibilityPayload({
-      targetType: "static-image",
+      targetType: "bad-image",
       workKey: "static:static-work",
       roleKey: "static-manifest:static-work-append",
-      imageKey: "dynamic:100",
+      imageKey: "static:200",
       isHidden: true
     })).toThrow("隐藏目标类型无效。");
   });

@@ -12,6 +12,7 @@ import {
   getCoverPayload
 } from "../../lib/client/portfolio-cover-options";
 import { buildCnPhotoOptions } from "../../lib/client/portfolio-cn-options";
+import { buildPortfolioImageSnapshotItems } from "../../lib/client/portfolio-image-snapshot";
 import {
   buildVisibilityImageOptions,
   buildVisibilityRoleOptions,
@@ -87,9 +88,10 @@ export default function PortfolioAdmin() {
   const selectedCnPhoto = cnPhotoOptions.find((photo) => photo.value === cnPhotoKey);
   const visibilityWorkOptions = buildVisibilityWorkOptions(snapshot);
   const visibilityRoleOptions = buildVisibilityRoleOptions(snapshot, visibilityWorkKey);
-  const visibilityImageOptions = buildVisibilityImageOptions(snapshot, visibilityTargetType, visibilityRoleKey);
-  const visibilityNeedsRole = visibilityTargetType === "role" || visibilityTargetType === "image" || visibilityTargetType === "static-image";
-  const visibilityNeedsImage = visibilityTargetType === "image" || visibilityTargetType === "static-image";
+  const visibilityImageOptions = buildVisibilityImageOptions(snapshot, visibilityRoleKey);
+  const visibilityNeedsRole = visibilityTargetType === "role" || visibilityTargetType === "image";
+  const visibilityNeedsImage = visibilityTargetType === "image";
+  const portfolioImageSnapshotItems = buildPortfolioImageSnapshotItems(snapshot);
 
   async function requestJson(url, { method = "GET", body } = {}) {
     const response = await fetch(url, {
@@ -656,8 +658,7 @@ export default function PortfolioAdmin() {
             }}>
               <option value="work">作品</option>
               <option value="role">角色</option>
-              <option value="image">动态图片</option>
-              <option value="static-image">追加图片</option>
+              <option value="image">图片</option>
             </select>
           </label>
           <label>
@@ -736,26 +737,13 @@ export default function PortfolioAdmin() {
         />
         <SnapshotList
           title="图片 snapshot"
-          items={snapshot.images}
-          emptyText="暂无动态图片。"
+          items={portfolioImageSnapshotItems}
+          emptyText="暂无图片。"
           renderItem={(image) => (
             <>
-              #{image.id} role:{image.role_id} {image.filename || image.cloudinary_public_id} {image.is_hidden ? "(hidden)" : ""}
-              <button className="button secondary" type="button" disabled={isBusy} onClick={() => hideItem("image", image.id, !image.is_hidden)}>
-                {image.is_hidden ? "恢复" : "隐藏"}
-              </button>
-            </>
-          )}
-        />
-        <SnapshotList
-          title="追加图片 snapshot"
-          items={snapshot.staticImages}
-          emptyText="暂无静态追加图片。"
-          renderItem={(image) => (
-            <>
-              #{image.id} role:{image.static_role_id} {image.filename || image.cloudinary_public_id} {image.is_hidden ? "(hidden)" : ""}
-              <button className="button secondary" type="button" disabled={isBusy} onClick={() => hideItem("static-image", `static:${image.id}`, !image.is_hidden)}>
-                {image.is_hidden ? "恢复" : "隐藏"}
+              #{image.id} {image.roleLabel} {image.label} {image.isHidden ? "(hidden)" : ""}
+              <button className="button secondary" type="button" disabled={isBusy} onClick={() => hideItem(image.hideTargetType, image.hideTargetId, !image.isHidden)}>
+                {image.isHidden ? "恢复" : "隐藏"}
               </button>
             </>
           )}
@@ -774,7 +762,7 @@ function SnapshotList({ title, items, emptyText, renderItem }) {
       ) : (
         <ul>
           {items.map((item) => (
-            <li key={item.id}>{renderItem(item)}</li>
+            <li key={item.key ?? item.id}>{renderItem(item)}</li>
           ))}
         </ul>
       )}

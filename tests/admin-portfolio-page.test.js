@@ -77,7 +77,8 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("作品 snapshot");
     expect(html).toContain("角色 snapshot");
     expect(html).toContain("图片 snapshot");
-    expect(html).toContain("追加图片 snapshot");
+    expect(html).not.toContain("追加图片 snapshot");
+    expect(html).not.toContain('value="static-image"');
     expect(createSection).not.toContain("作品 ID");
     expect(uploadSection).not.toContain("作品 slug");
     expect(uploadSection).not.toContain("角色 slug");

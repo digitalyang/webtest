@@ -69,6 +69,29 @@ describe("buildCoverPhotoOptions", () => {
   test("returns no photos when the role has no matching images", () => {
     expect(buildCoverPhotoOptions({ source: "static", workSource: "static", id: "empty-role" }, snapshot)).toEqual([]);
   });
+
+  test("excludes portfolio-covers rows from static cover options", () => {
+    const withCoverDup = {
+      ...snapshot,
+      staticImages: [
+        ...snapshot.staticImages,
+        {
+          id: 99,
+          static_role_id: "static-role",
+          filename: "dup.jpg",
+          cloudinary_public_id: "webtest/portfolio-covers/static-role/dup"
+        }
+      ]
+    };
+    expect(buildCoverPhotoOptions(staticRole, withCoverDup)).toEqual([
+      {
+        source: "static",
+        id: 21,
+        label: "static-one.jpg",
+        value: "static:21"
+      }
+    ]);
+  });
 });
 
 describe("getCoverPayload", () => {

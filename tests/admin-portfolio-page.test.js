@@ -46,6 +46,7 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("设置封面");
     expect(html).toContain("设置图片 CN");
     expect(html).toContain("隐藏 / 恢复");
+    expect(html).toContain("操作对象");
     expect(html).toContain("作品标题");
     expect(html).toContain("作品 slug");
     expect(html).toContain("角色标题");
@@ -53,7 +54,6 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("角色所属作品");
     expect(html).toContain("选择作品");
     expect(html).toContain("选择相册");
-    expect(html).toContain("目标类型");
     expect(html).toContain("作品封面");
     expect(html).toContain("角色封面");
     expect(html).toContain("选择封面作品");
@@ -62,9 +62,13 @@ describe("admin portfolio upload page", () => {
     expect(html).toContain("选择 CN 作品");
     expect(html).toContain("选择 CN 角色");
     expect(html).toContain("选择图片");
+    expect(html).toContain("选择隐藏作品");
+    expect(html).toContain("选择隐藏角色");
+    expect(html).toContain("选择隐藏图片");
     expect(html).toContain("CN 圈名");
     expect(html).toContain("保存 CN");
     expect(html).toContain("清空 CN");
+    expect(html).toContain("更新隐藏状态");
     expect(html).toContain("上传状态");
     expect(html).toContain("上传进度");
     expect(html).toContain("0%");
@@ -82,6 +86,7 @@ describe("admin portfolio upload page", () => {
     expect(html).not.toContain("旧相册");
     expect(html).not.toContain("目标 ID");
     expect(html).not.toContain("图片 ID");
+    expect(html).not.toContain("对象标识");
     expect(html).not.toContain("隐藏 Token");
     expect(html).not.toContain("接口接入中");
   });

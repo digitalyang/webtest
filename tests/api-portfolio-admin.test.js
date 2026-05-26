@@ -9,6 +9,7 @@ import {
   handleCreateImagesRequest,
   handleImageUploadPlanRequest,
   handleSetImageCreditRequest,
+  handleUpdateWorkRequest,
   savePortfolioImages,
   setPortfolioCover,
   setPortfolioImageCredit,
@@ -25,10 +26,21 @@ import {
 } from "../lib/server/admin-auth.js";
 
 const sessionRouteContext = vi.hoisted(() => ({ env: {} }));
+const portfolioAdminRouteMocks = vi.hoisted(() => ({
+  handleUpdateStaticRoleRequest: vi.fn(() => new Response(null, { status: 204 }))
+}));
 
 vi.mock("../lib/server/cloudflare", () => ({
   getRequestContext: () => ({ env: sessionRouteContext.env })
 }));
+
+vi.mock("../lib/server/portfolio-admin.js", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    handleUpdateStaticRoleRequest: portfolioAdminRouteMocks.handleUpdateStaticRoleRequest
+  };
+});
 
 function createEnv(responses = [], { batch = true } = {}) {
   const calls = [];
@@ -198,8 +210,271 @@ describe("portfolio admin D1 helpers", () => {
     expect(env.calls[1].values).toEqual([9, 2]);
 
     await updatePortfolioVisibility(env, { targetType: "image", targetId: 9, isHidden: true });
+    expect(env.calls[2].sql).toContain("SELECT 1 FROM portfolio_images");
+    expect(env.calls[2].values).toEqual([9]);
+    expect(env.calls[3].sql).toContain("UPDATE portfolio_images");
+    expect(env.calls[3].values).toEqual([1, 9]);
+  });
+
+  test("cascades dynamic work visibility to child roles and images", async () => {
+    const env = createEnv([{ success: true }, { success: true }, { success: true }]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "work", targetId: "10", isHidden: true }))
+      .resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(4);
+    expect(env.calls[0].sql).toContain("SELECT 1 FROM portfolio_works");
+    expect(env.calls[0].values).toEqual([10]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_works");
+    expect(env.calls[1].sql).toContain("WHERE id = ?");
+    expect(env.calls[1].values).toEqual([1, 10]);
+    expect(env.calls[2].sql).toContain("UPDATE portfolio_roles");
+    expect(env.calls[2].sql).toContain("WHERE work_id = ?");
+    expect(env.calls[2].values).toEqual([1, 10]);
+    expect(env.calls[3].sql).toContain("UPDATE portfolio_images");
+    expect(env.calls[3].sql).toContain("WHERE work_id = ?");
+    expect(env.calls[3].values).toEqual([1, 10]);
+  });
+
+  test("cascades dynamic role visibility to child images", async () => {
+    const env = createEnv([{ success: true }, { success: true }]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "role", targetId: "20", isHidden: false }))
+      .resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(3);
+    expect(env.calls[0].sql).toContain("SELECT 1 FROM portfolio_roles");
+    expect(env.calls[0].values).toEqual([20]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_roles");
+    expect(env.calls[1].sql).toContain("WHERE id = ?");
+    expect(env.calls[1].values).toEqual([0, 20]);
     expect(env.calls[2].sql).toContain("UPDATE portfolio_images");
-    expect(env.calls[2].values).toEqual([1, 9]);
+    expect(env.calls[2].sql).toContain("WHERE role_id = ?");
+    expect(env.calls[2].values).toEqual([0, 20]);
+  });
+
+  test("updates only the selected dynamic image visibility", async () => {
+    const env = createEnv([{ success: true }]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "image", targetId: "30", isHidden: true }))
+      .resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(2);
+    expect(env.calls[0].sql).toContain("SELECT 1 FROM portfolio_images");
+    expect(env.calls[0].values).toEqual([30]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_images");
+    expect(env.calls[1].sql).toContain("WHERE id = ?");
+    expect(env.calls[1].values).toEqual([1, 30]);
+  });
+
+  test("cascades static work visibility to static roles and images", async () => {
+    const env = createEnv([{ success: true }, { success: true }]);
+
+    await expect(updatePortfolioVisibility(env, {
+      targetType: "static-work",
+      targetId: "girlsbandcry",
+      isHidden: true
+    })).resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(2);
+    expect(env.calls[0].sql).toContain("UPDATE portfolio_static_roles");
+    expect(env.calls[0].sql).toContain("WHERE static_work_id = ?");
+    expect(env.calls[0].values).toEqual([1, "girlsbandcry"]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[1].sql).toContain("WHERE static_work_id = ?");
+    expect(env.calls[1].values).toEqual([1, "girlsbandcry"]);
+  });
+
+  test("routes work visibility updates with static slugs to static portfolio rows", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ success: true }, { success: true }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    const cookie = await createAdminSessionCookie(env);
+
+    const response = await handleUpdateWorkRequest(new Request("https://example.com/api/admin/portfolio/works/girlsbandcry", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({ isHidden: true })
+    }), env, "girlsbandcry");
+
+    expect(response.status).toBe(200);
+    expect(env.calls).toHaveLength(2);
+    expect(env.calls[0].sql).toContain("UPDATE portfolio_static_roles");
+    expect(env.calls[0].values).toEqual([1, "girlsbandcry"]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[1].values).toEqual([1, "girlsbandcry"]);
+  });
+
+  test("routes work visibility updates with numeric ids to dynamic portfolio rows", async () => {
+    const hash = await hashAdminPassword("secret");
+    const env = createEnv([{ exists: 1 }, { success: true }, { success: true }, { success: true }]);
+    env.ADMIN_PASSWORD_HASH = hash;
+    const cookie = await createAdminSessionCookie(env);
+
+    const response = await handleUpdateWorkRequest(new Request("https://example.com/api/admin/portfolio/works/10", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Cookie: cookie },
+      body: JSON.stringify({ isHidden: false })
+    }), env, "10");
+
+    expect(response.status).toBe(200);
+    expect(env.calls).toHaveLength(4);
+    expect(env.calls[0].sql).toContain("SELECT 1 FROM portfolio_works");
+    expect(env.calls[0].values).toEqual([10]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_works");
+    expect(env.calls[1].values).toEqual([0, 10]);
+    expect(env.calls[2].sql).toContain("UPDATE portfolio_roles");
+    expect(env.calls[2].values).toEqual([0, 10]);
+    expect(env.calls[3].sql).toContain("UPDATE portfolio_images");
+    expect(env.calls[3].values).toEqual([0, 10]);
+  });
+
+  test("looks up static role rows before cascading visibility to static images", async () => {
+    const env = createEnv([
+      { static_work_id: "girlsbandcry", slug: "subaru" },
+      { success: true },
+      { success: true }
+    ]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "static-role", targetId: "12", isHidden: true }))
+      .resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(3);
+    expect(env.calls[0].sql).toContain("SELECT static_work_id, slug");
+    expect(env.calls[0].sql).toContain("FROM portfolio_static_roles");
+    expect(env.calls[0].values).toEqual([12]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_roles");
+    expect(env.calls[1].sql).toContain("WHERE id = ?");
+    expect(env.calls[1].values).toEqual([1, 12]);
+    expect(env.calls[2].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[2].sql).toContain("WHERE static_role_id = ?");
+    expect(env.calls[2].values).toEqual([1, "girlsbandcry-subaru"]);
+  });
+
+  test("updates only the selected static image visibility", async () => {
+    const env = createEnv([{ success: true }]);
+
+    await expect(updatePortfolioVisibility(env, {
+      targetType: "static-image",
+      targetId: "static:50",
+      isHidden: false
+    })).resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(2);
+    expect(env.calls[0].sql).toContain("SELECT 1 FROM portfolio_static_images");
+    expect(env.calls[0].values).toEqual([50]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[1].sql).toContain("WHERE id = ?");
+    expect(env.calls[1].values).toEqual([0, 50]);
+  });
+
+  test("rejects invalid visibility ids before writing", async () => {
+    const env = createEnv();
+
+    await expect(updatePortfolioVisibility(env, { targetType: "image", targetId: "bad", isHidden: true }))
+      .rejects.toThrow("Visibility target id is required");
+    expect(env.calls).toEqual([]);
+  });
+
+  test("rejects missing dynamic work visibility targets before cascading", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "work", targetId: "10", isHidden: true }))
+      .rejects.toThrow("作品不存在。");
+
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("FROM portfolio_works");
+    expect(env.calls[0].values).toEqual([10]);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_works"))).toBe(false);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_roles"))).toBe(false);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_images"))).toBe(false);
+  });
+
+  test("rejects missing dynamic role visibility targets before cascading", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "role", targetId: "20", isHidden: true }))
+      .rejects.toThrow("角色不存在。");
+
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("FROM portfolio_roles");
+    expect(env.calls[0].values).toEqual([20]);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_roles"))).toBe(false);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_images"))).toBe(false);
+  });
+
+  test("rejects missing dynamic image visibility targets before writing", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "image", targetId: "30", isHidden: true }))
+      .rejects.toThrow("图片不存在。");
+
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("FROM portfolio_images");
+    expect(env.calls[0].values).toEqual([30]);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_images"))).toBe(false);
+  });
+
+  test("allows static work visibility updates with no appended D1 rows", async () => {
+    const env = createEnv([{ success: true }, { success: true }]);
+
+    await expect(updatePortfolioVisibility(env, {
+      targetType: "static-work",
+      targetId: "girlsbandcry",
+      isHidden: false
+    })).resolves.toBeTruthy();
+
+    expect(env.calls).toHaveLength(2);
+    expect(env.calls[0].sql).toContain("UPDATE portfolio_static_roles");
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_images");
+  });
+
+  test("rejects invalid static work visibility ids before writing", async () => {
+    for (const targetId of ["Bad Slug", "../bad", "中文"]) {
+      const env = createEnv();
+
+      await expect(updatePortfolioVisibility(env, {
+        targetType: "static-work",
+        targetId,
+        isHidden: true
+      })).rejects.toThrow("Invalid static work id");
+      expect(env.calls).toEqual([]);
+    }
+  });
+
+  test("rejects missing static image visibility targets before writing", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(updatePortfolioVisibility(env, {
+      targetType: "static-image",
+      targetId: "static:50",
+      isHidden: true
+    })).rejects.toThrow("追加图片不存在。");
+
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("FROM portfolio_static_images");
+    expect(env.calls[0].values).toEqual([50]);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_static_images"))).toBe(false);
+  });
+
+  test("rejects missing static role visibility targets before writing", async () => {
+    const env = createEnv([undefined]);
+
+    await expect(updatePortfolioVisibility(env, { targetType: "static-role", targetId: "12", isHidden: true }))
+      .rejects.toThrow("Static portfolio role was not found.");
+
+    expect(env.calls).toHaveLength(1);
+    expect(env.calls[0].sql).toContain("FROM portfolio_static_roles");
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_static_roles"))).toBe(false);
+    expect(env.calls.some((call) => call.sql?.includes("UPDATE portfolio_static_images"))).toBe(false);
+  });
+
+  test("rejects invalid visibility target types", async () => {
+    const env = createEnv();
+
+    await expect(updatePortfolioVisibility(env, { targetType: "unknown", targetId: "1", isHidden: true }))
+      .rejects.toThrow("Invalid visibility target type");
+    expect(env.calls).toEqual([]);
   });
 
   test("derives missing dynamic cover thumbnails before setting covers", async () => {
@@ -697,8 +972,28 @@ describe("portfolio admin API request validation", () => {
     });
 
     expect(response.status).toBe(200);
-    expect(env.calls[0].sql).toContain("UPDATE portfolio_static_images");
-    expect(env.calls[0].values).toEqual([1, 50]);
+    expect(env.calls[0].sql).toContain("SELECT 1 FROM portfolio_static_images");
+    expect(env.calls[0].values).toEqual([50]);
+    expect(env.calls[1].sql).toContain("UPDATE portfolio_static_images");
+    expect(env.calls[1].values).toEqual([1, 50]);
+  });
+
+  test("delegates static role visibility updates to the helper", async () => {
+    portfolioAdminRouteMocks.handleUpdateStaticRoleRequest.mockClear();
+    sessionRouteContext.env = createEnv();
+    const request = new Request("https://example.com/api/admin/portfolio/static-roles/40", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isHidden: true })
+    });
+    const { PATCH } = await import("../app/api/admin/portfolio/static-roles/[roleId]/route.js");
+
+    await PATCH(request, {
+      params: Promise.resolve({ roleId: "40" })
+    });
+
+    expect(portfolioAdminRouteMocks.handleUpdateStaticRoleRequest)
+      .toHaveBeenCalledWith(request, sessionRouteContext.env, "40");
   });
 
   test("rejects static role covers when the image belongs to another role", async () => {

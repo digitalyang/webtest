@@ -12,6 +12,12 @@ import {
   getCoverPayload
 } from "../../lib/client/portfolio-cover-options";
 import { buildCnPhotoOptions } from "../../lib/client/portfolio-cn-options";
+import {
+  buildVisibilityImageOptions,
+  buildVisibilityRoleOptions,
+  buildVisibilityWorkOptions,
+  getVisibilityPayload
+} from "../../lib/client/portfolio-visibility-options";
 
 const INITIAL_SNAPSHOT = {
   works: [],
@@ -29,7 +35,9 @@ const INITIAL_SNAPSHOT = {
 
 const VISIBILITY_ENDPOINTS = {
   work: "/api/admin/portfolio/works",
+  "static-work": "/api/admin/portfolio/works",
   role: "/api/admin/portfolio/roles",
+  "static-role": "/api/admin/portfolio/static-roles",
   image: "/api/admin/portfolio/images",
   "static-image": "/api/admin/portfolio/images"
 };
@@ -60,8 +68,10 @@ export default function PortfolioAdmin() {
   const [cnRoleKey, setCnRoleKey] = useState("");
   const [cnPhotoKey, setCnPhotoKey] = useState("");
   const [cnCoserName, setCnCoserName] = useState("");
-  const [visibilityTargetType, setVisibilityTargetType] = useState("image");
-  const [visibilityTargetId, setVisibilityTargetId] = useState("");
+  const [visibilityTargetType, setVisibilityTargetType] = useState("work");
+  const [visibilityWorkKey, setVisibilityWorkKey] = useState("");
+  const [visibilityRoleKey, setVisibilityRoleKey] = useState("");
+  const [visibilityImageKey, setVisibilityImageKey] = useState("");
   const [visibilityHidden, setVisibilityHidden] = useState(true);
   const workOptions = snapshot.adminOptions?.works || [];
   const roleOptions = selectedWorkKey ? snapshot.adminOptions?.rolesByWork?.[selectedWorkKey] || [] : [];
@@ -75,6 +85,11 @@ export default function PortfolioAdmin() {
   const selectedCnRole = cnRoleOptions.find((role) => role.value === cnRoleKey);
   const cnPhotoOptions = buildCnPhotoOptions(selectedCnRole, snapshot);
   const selectedCnPhoto = cnPhotoOptions.find((photo) => photo.value === cnPhotoKey);
+  const visibilityWorkOptions = buildVisibilityWorkOptions(snapshot);
+  const visibilityRoleOptions = buildVisibilityRoleOptions(snapshot, visibilityWorkKey);
+  const visibilityImageOptions = buildVisibilityImageOptions(snapshot, visibilityTargetType, visibilityRoleKey);
+  const visibilityNeedsRole = visibilityTargetType === "role" || visibilityTargetType === "image" || visibilityTargetType === "static-image";
+  const visibilityNeedsImage = visibilityTargetType === "image" || visibilityTargetType === "static-image";
 
   async function requestJson(url, { method = "GET", body } = {}) {
     const response = await fetch(url, {
@@ -381,17 +396,34 @@ export default function PortfolioAdmin() {
     });
   }
 
-  async function hideItem(targetType = visibilityTargetType, targetId = visibilityTargetId, isHidden = visibilityHidden) {
-    const endpoint = VISIBILITY_ENDPOINTS[targetType];
+  async function hideItem(targetType, targetId, isHidden) {
+    let payload;
+
+    try {
+      payload = targetType !== undefined && targetId !== undefined
+        ? { targetType, targetId, isHidden: Boolean(isHidden) }
+        : getVisibilityPayload({
+          targetType: visibilityTargetType,
+          workKey: visibilityWorkKey,
+          roleKey: visibilityRoleKey,
+          imageKey: visibilityImageKey,
+          isHidden: visibilityHidden
+        });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "隐藏状态参数无效。");
+      return;
+    }
+
+    const endpoint = VISIBILITY_ENDPOINTS[payload.targetType];
     if (!endpoint) {
       setErrorMessage("隐藏目标类型无效。");
       return;
     }
 
     await runAction("正在更新隐藏状态...", async () => {
-      await requestJson(`${endpoint}/${encodeURIComponent(targetId)}`, {
+      await requestJson(`${endpoint}/${encodeURIComponent(payload.targetId)}`, {
         method: "PATCH",
-        body: { isHidden }
+        body: { isHidden: payload.isHidden }
       });
       await fetchPortfolioSnapshot();
       setStatusMessage("隐藏状态已更新，snapshot 已刷新。");
@@ -615,17 +647,52 @@ export default function PortfolioAdmin() {
         <div className="admin-card">
           <h2>隐藏 / 恢复</h2>
           <label>
-            目标类型
-            <select value={visibilityTargetType} onChange={(event) => setVisibilityTargetType(event.target.value)}>
+            操作对象
+            <select value={visibilityTargetType} onChange={(event) => {
+              setVisibilityTargetType(event.target.value);
+              setVisibilityWorkKey("");
+              setVisibilityRoleKey("");
+              setVisibilityImageKey("");
+            }}>
               <option value="work">作品</option>
               <option value="role">角色</option>
-              <option value="image">图片</option>
+              <option value="image">动态图片</option>
               <option value="static-image">追加图片</option>
             </select>
           </label>
           <label>
-            对象标识
-            <input value={visibilityTargetId} onChange={(event) => setVisibilityTargetId(event.target.value)} placeholder="1" />
+            选择隐藏作品
+            <select value={visibilityWorkKey} onChange={(event) => {
+              setVisibilityWorkKey(event.target.value);
+              setVisibilityRoleKey("");
+              setVisibilityImageKey("");
+            }}>
+              <option value="">请选择作品</option>
+              {visibilityWorkOptions.map((work) => (
+                <option key={work.value} value={work.value}>{work.label}</option>
+              ))}
+            </select>
+          </label>
+          <label hidden={!visibilityNeedsRole}>
+            选择隐藏角色
+            <select value={visibilityRoleKey} onChange={(event) => {
+              setVisibilityRoleKey(event.target.value);
+              setVisibilityImageKey("");
+            }} disabled={!visibilityNeedsRole || !visibilityWorkKey}>
+              <option value="">{visibilityWorkKey ? "请选择角色" : "请先选择作品"}</option>
+              {visibilityRoleOptions.map((role) => (
+                <option key={role.value} value={role.value}>{role.label}</option>
+              ))}
+            </select>
+          </label>
+          <label hidden={!visibilityNeedsImage}>
+            选择隐藏图片
+            <select value={visibilityImageKey} onChange={(event) => setVisibilityImageKey(event.target.value)} disabled={!visibilityNeedsImage || !visibilityRoleKey}>
+              <option value="">{visibilityRoleKey ? "请选择图片" : "请先选择角色"}</option>
+              {visibilityImageOptions.map((image) => (
+                <option key={image.value} value={image.value}>{image.label}</option>
+              ))}
+            </select>
           </label>
           <label>
             隐藏状态
